@@ -1,0 +1,343 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  LEARNER
+  INSTRUCTOR
+  ADMIN
+}
+
+enum QuestionType {
+  TRUE_FALSE
+  MULTIPLE_CHOICE
+  MULTIPLE_SELECT
+  SHORT_ANSWER
+  IDENTIFICATION
+  ESSAY
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum AssessmentMode {
+  REVIEWER
+  QUIZ
+  EXAM
+}
+
+enum AssessmentStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  ARCHIVED
+}
+
+enum CodeStatus {
+  ACTIVE
+  DISABLED
+  EXPIRED
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+}
+
+enum GradingStatus {
+  AUTO_GRADED
+  PENDING_GRADING
+  GRADED
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String?
+  image       String?
+  googleSub   String   @unique
+  role        Role     @default(LEARNER)
+  timezone    String   @default("Asia/Manila")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  taughtSections SectionInstructor[]
+  enrollments     Enrollment[]
+  questions       Question[]
+  questionSets    QuestionSet[]
+  assessments     Assessment[]
+  attempts        Attempt[]
+  joinAttempts    JoinAttempt[]
+  roleChanges     RoleChange[]       @relation("RoleChangeTarget")
+  roleChangeActs  RoleChange[]       @relation("RoleChangeActor")
+  auditActs       AuditLog[]         @relation("AuditActor")
+  codeCreations   SectionCode[]      @relation("CodeCreator")
+  gradesGiven     EssayGrade[]       @relation("Grader")
+}
+
+model RoleChange {
+  id         String   @id @default(cuid())
+  userId     String
+  fromRole   Role
+  toRole     Role
+  changedBy  String
+  createdAt  DateTime @default(now())
+  user       User     @relation("RoleChangeTarget", fields: [userId], references: [id])
+  actor      User     @relation("RoleChangeActor", fields: [changedBy], references: [id])
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  action    String
+  entity    String
+  entityId  String
+  meta      Json?
+  createdAt DateTime @default(now())
+  actor     User?    @relation("AuditActor", fields: [actorId], references: [id])
+
+  @@index([entity, entityId])
+}
+
+model Section {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  instructors SectionInstructor[]
+  codes       SectionCode[]
+  enrollments Enrollment[]
+  assignments SectionAssignment[]
+}
+
+model SectionInstructor {
+  sectionId   String
+  userId      String
+  assignedBy  String?
+  createdAt   DateTime @default(now())
+  section     Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([sectionId, userId])
+  @@index([userId])
+}
+
+model SectionCode {
+  id         String     @id @default(cuid())
+  sectionId  String
+  code       String     @unique
+  status     CodeStatus @default(ACTIVE)
+  expiresAt  DateTime?
+  createdBy  String?
+  createdAt  DateTime   @default(now())
+  disabledAt DateTime?
+  section    Section    @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  creator    User?      @relation("CodeCreator", fields: [createdBy], references: [id])
+
+  @@index([sectionId, status])
+}
+
+model Enrollment {
+  id          String   @id @default(cuid())
+  sectionId   String
+  userId      String
+  enrolledBy  String?
+  createdAt   DateTime @default(now())
+  section     Section  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sectionId, userId])
+  @@index([userId])
+}
+
+model JoinAttempt {
+  id        String   @id @default(cuid())
+  code      String
+  userId    String?
+  ip        String?
+  success   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([ip, createdAt])
+}
+
+model Question {
+  id          String       @id @default(cuid())
+  ownerId     String
+  type        QuestionType
+  prompt      String       @db.Text
+  subject     String
+  topic       String
+  difficulty  Difficulty   @default(MEDIUM)
+  points      Int          @default(1)
+  payload     Json
+  explanation String?      @db.Text
+  archived    Boolean      @default(false)
+  version     Int          @default(1)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  owner       User             @relation(fields: [ownerId], references: [id])
+  setItems    QuestionSetItem[]
+
+  @@index([ownerId, archived])
+  @@index([subject, topic])
+}
+
+model QuestionSet {
+  id          String   @id @default(cuid())
+  ownerId     String
+  title       String
+  description String?
+  archived    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner User              @relation(fields: [ownerId], references: [id])
+  items QuestionSetItem[]
+}
+
+model QuestionSetItem {
+  setId      String
+  questionId String
+  order      Int      @default(0)
+  set        QuestionSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+  question   Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@id([setId, questionId])
+}
+
+model Assessment {
+  id          String           @id @default(cuid())
+  ownerId     String
+  title       String
+  description String?          @db.Text
+  mode        AssessmentMode
+  status      AssessmentStatus @default(DRAFT)
+  draft       Json?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  owner        User                 @relation(fields: [ownerId], references: [id])
+  versions     AssessmentVersion[]
+  assignments  SectionAssignment[]
+  attempts     Attempt[]
+}
+
+model AssessmentVersion {
+  id           String   @id @default(cuid())
+  assessmentId String
+  version      Int
+  snapshot     Json
+  publishedAt  DateTime @default(now())
+  publishedBy  String?
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  assignments  SectionAssignment[]
+  attempts     Attempt[]
+
+  @@unique([assessmentId, version])
+}
+
+model SectionAssignment {
+  id          String   @id @default(cuid())
+  assessmentId String
+  sectionId   String
+  versionId   String?
+  opensAt     DateTime?
+  closesAt    DateTime?
+  timeLimitSec Int?
+  attemptLimit Int     @default(1)
+  shuffleQuestions Boolean @default(false)
+  shuffleOptions   Boolean @default(false)
+  feedbackRelease Json?
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  section    Section    @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  version    AssessmentVersion? @relation(fields: [versionId], references: [id])
+  attempts   Attempt[]
+
+  @@unique([assessmentId, sectionId])
+  @@index([sectionId])
+}
+
+model Attempt {
+  id           String       @id @default(cuid())
+  assignmentId String
+  assessmentId String
+  versionId    String?
+  userId       String
+  attemptNumber Int
+  status       AttemptStatus @default(IN_PROGRESS)
+  itemOrder    Json
+  items        Json?
+  flags        Json?
+  deadlineAt   DateTime?
+  startedAt    DateTime     @default(now())
+  submittedAt  DateTime?
+  score        Float?
+  maxScore     Float?
+  gradingStatus GradingStatus?
+  idempotencyKey String?     @unique
+  createdAt    DateTime     @default(now())
+
+  assignment SectionAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  assessment Assessment        @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  version    AssessmentVersion? @relation(fields: [versionId], references: [id])
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  responses  Response[]
+  essayGrades EssayGrade[]
+
+  @@unique([assignmentId, userId, attemptNumber])
+  @@index([userId, status])
+  @@index([status, deadlineAt])
+}
+
+model Response {
+  id          String   @id @default(cuid())
+  attemptId   String
+  itemKey     String
+  answer      Json?
+  isCorrect   Boolean?
+  score       Float?
+  maxScore    Float?
+  savedAt     DateTime @updatedAt
+  createdAt   DateTime @default(now())
+
+  attempt Attempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  grade   EssayGrade?
+
+  @@unique([attemptId, itemKey])
+}
+
+model EssayGrade {
+  id          String   @id @default(cuid())
+  responseId  String   @unique
+  attemptId   String
+  score       Float
+  maxScore    Float
+  rubricScores Json?
+  feedback    String?  @db.Text
+  gradedById  String
+  gradedAt    DateTime @default(now())
+
+  response Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  attempt  Attempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  grader   User     @relation("Grader", fields: [gradedById], references: [id])
+}

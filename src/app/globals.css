@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme {
+  --color-pine-950: #0d2820;
+  --color-pine-900: #12352b;
+  --color-pine-800: #1d4d3c;
+  --color-pine-700: #2a6350;
+  --color-pine-100: #dce8e0;
+  --color-pine-50: #eef4f0;
+  --color-ivory-50: #f7f4e8;
+  --color-ivory-100: #fffdf6;
+  --color-ink-900: #1f2c26;
+  --color-ink-600: #4a5a52;
+  --color-ink-400: #7d8a83;
+  --color-gold-500: #b5995a;
+  --color-gold-600: #9a7f45;
+  --color-gold-100: #f0e7d2;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --background: #f7f4e8;
+  --foreground: #1f2c26;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Visible keyboard focus everywhere */
+:focus-visible {
+  outline: 3px solid #b5995a;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Consistent form controls */
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='number'],
+input[type='datetime-local'],
+select,
+textarea {
+  @apply w-full rounded-lg border border-ink-400/40 bg-ivory-100 px-3 py-2 text-sm text-ink-900 placeholder:text-ink-400;
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid #b5995a;
+  outline-offset: 1px;
+  border-color: #b5995a;
+}
