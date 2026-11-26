@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function QuestionFilters({
   subjects,
@@ -13,6 +13,10 @@ export function QuestionFilters({
   const router = useRouter();
   const params = useSearchParams();
   const [q, setQ] = useState(current.q ?? '');
+  const currentRef = useRef(current);
+  useEffect(() => {
+    currentRef.current = current;
+  }, [current]);
 
   function apply(next: Record<string, string | undefined>) {
     const sp = new URLSearchParams();
@@ -21,16 +25,24 @@ export function QuestionFilters({
   }
 
   function setParam(key: string, value: string) {
-    apply({ ...current, [key]: value || undefined });
+    apply({ ...currentRef.current, [key]: value || undefined });
   }
+
+  // Debounced auto-search: typing applies after a short pause.
+  useEffect(() => {
+    const next = q.trim();
+    if (next === (currentRef.current.q ?? '')) return;
+    const t = setTimeout(() => {
+      apply({ ...currentRef.current, q: next || undefined });
+    }, 400);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q]);
 
   return (
     <form
       className="flex flex-wrap items-end gap-3"
-      onSubmit={(e) => {
-        e.preventDefault();
-        apply({ ...current, q: q || undefined });
-      }}
+      onSubmit={(e) => e.preventDefault()}
     >
       <div className="min-w-48 flex-1">
         <label htmlFor="q" className="mb-1 block text-xs font-medium text-ink-600">Search</label>
@@ -73,11 +85,15 @@ export function QuestionFilters({
           <option value="1">Archived only</option>
         </select>
       </div>
-      <button type="submit" className="rounded-lg bg-pine-900 px-4 py-2 text-sm font-medium text-ivory-50 hover:bg-pine-800">
-        Search
-      </button>
       {params.toString() && (
-        <button type="button" onClick={() => router.push('/teach/questions')} className="text-sm text-pine-900 hover:underline">
+        <button
+          type="button"
+          onClick={() => {
+            setQ('');
+            router.push('/teach/questions');
+          }}
+          className="text-sm text-pine-900 hover:underline"
+        >
           Clear
         </button>
       )}
