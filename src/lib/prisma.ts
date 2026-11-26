@@ -4,8 +4,11 @@ import { PrismaPg } from '@prisma/adapter-pg';
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function createClient() {
-  // DATABASE_URL locally; Verce/Neon integrations inject POSTGRES_* vars.
+  // Prefer the pooled endpoint when present (Vercel/Neon/Prisma Postgres
+  // integrations inject DATABASE_URL_POOLED for app traffic; DATABASE_URL may
+  // be the direct/migration string). Local dev only sets DATABASE_URL.
   const connectionString =
+    process.env.DATABASE_URL_POOLED ??
     process.env.DATABASE_URL ??
     process.env.POSTGRES_PRISMA_URL ??
     process.env.POSTGRES_URL ??
