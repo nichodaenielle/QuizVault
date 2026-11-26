@@ -7,7 +7,6 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 export const metadata: Metadata = {
   title: 'QuizVault',
   description: 'Reviewers, quizzes, and exams for students and instructors.',
-  icons: { icon: '/logos/QuizVault%20Logo%20Only.png' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
