@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/auth';
 import { AppShell } from '@/components/shell';
-import { Badge, Card, LinkButton, PageHeader, StatCard } from '@/components/ui';
+import { Badge, Card, PageHeader, StatCard } from '@/components/ui';
 import { formatDateTime } from '@/lib/time';
 import type { Role } from '@prisma/client';
 
@@ -124,9 +124,6 @@ export default async function AdminPage() {
         </Card>
       </div>
 
-      <div className="mt-6">
-        <LinkButton href="/admin/users" variant="secondary">Manage users & roles</LinkButton>
-      </div>
     </AppShell>
   );
 }
