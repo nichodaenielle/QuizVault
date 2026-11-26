@@ -56,9 +56,9 @@ export function LinkButton({
   );
 }
 
-export function Card({ children, className }: { children: ReactNode; className?: string }) {
+export function Card({ children, className, id }: { children: ReactNode; className?: string; id?: string }) {
   return (
-    <div className={cn('rounded-xl border border-ink-400/15 bg-ivory-100 shadow-sm', className)}>
+    <div id={id} className={cn('rounded-xl border border-ink-400/15 bg-ivory-100 shadow-sm', className)}>
       {children}
     </div>
   );
@@ -140,6 +140,36 @@ export function PageHeader({
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>
   );
+}
+
+export function StatCard({
+  label,
+  value,
+  hint,
+  href,
+  tone = 'neutral',
+}: {
+  label: string;
+  value: ReactNode;
+  hint?: string;
+  href?: string;
+  tone?: 'neutral' | 'green' | 'gold' | 'red' | 'blue';
+}) {
+  const accent = {
+    neutral: 'text-ink-900',
+    green: 'text-pine-800',
+    gold: 'text-gold-600',
+    red: 'text-red-700',
+    blue: 'text-sky-700',
+  }[tone];
+  const inner = (
+    <div className={cn('rounded-xl border border-ink-400/15 bg-ivory-100 p-4 shadow-sm', href && 'transition-colors hover:border-pine-800/40')}>
+      <p className="text-xs font-medium uppercase tracking-wide text-ink-600">{label}</p>
+      <p className={cn('mt-1 text-2xl font-semibold tabular-nums', accent)}>{value}</p>
+      {hint && <p className="mt-1 text-xs text-ink-600">{hint}</p>}
+    </div>
+  );
+  return href ? <Link href={href}>{inner}</Link> : inner;
 }
 
 export function EmptyState({ title, body, action }: { title: string; body?: string; action?: ReactNode }) {
