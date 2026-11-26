@@ -9,6 +9,7 @@ import { formatDateTime } from '@/lib/time';
 import { CodeControls } from './code-controls';
 import { RosterControls } from './roster-controls';
 import { InstructorControls } from './instructor-controls';
+import { InviteLearner } from './invite-learner';
 
 export const dynamic = 'force-dynamic';
 
@@ -150,6 +151,11 @@ export default async function SectionDetailPage({
             <div className="mt-3">
               <CodeControls sectionId={id} codes={section.codes.map((c) => ({ id: c.id, code: c.code, status: c.status, expiresAt: c.expiresAt?.toISOString() ?? null }))} />
             </div>
+          </Card>
+
+          <Card className="p-5">
+            <h2 className="mb-3 font-semibold text-ink-900">Invite by link</h2>
+            <InviteLearner sectionId={id} sectionName={section.name} />
           </Card>
 
           <Card className="p-5">

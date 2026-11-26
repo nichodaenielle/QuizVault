@@ -17,8 +17,9 @@ export default async function SignInPage({
   searchParams: Promise<{ error?: string; next?: string }>;
 }) {
   const user = await getSessionUser();
-  if (user) redirect(homePathFor(user.role));
-  const { error } = await searchParams;
+  const { error, next } = await searchParams;
+  const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : null;
+  if (user) redirect(safeNext ?? homePathFor(user.role));
   const oauthConfigured = !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET;
   const devAuth = process.env.DEV_AUTH === '1' && process.env.NODE_ENV !== 'production';
 

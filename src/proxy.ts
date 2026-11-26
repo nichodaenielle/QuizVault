@@ -15,7 +15,16 @@ export function proxy(req: NextRequest) {
   if (!hasSession && !isPublic) {
     const url = new URL('/sign-in', req.url);
     url.searchParams.set('next', pathname);
-    return NextResponse.redirect(url);
+    const res = NextResponse.redirect(url);
+    // Remember where the user was headed so post-login redirects (e.g. invite
+    // links) can return them there.
+    res.cookies.set('qv_next', pathname, {
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: 600,
+      path: '/',
+    });
+    return res;
   }
   if (hasSession && pathname === '/sign-in') {
     return NextResponse.redirect(new URL('/dashboard', req.url));

@@ -65,6 +65,7 @@ model User {
   googleSub   String   @unique
   role        Role     @default(LEARNER)
   timezone    String   @default("Asia/Manila")
+  details     String?  @db.Text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -80,6 +81,8 @@ model User {
   auditActs       AuditLog[]         @relation("AuditActor")
   codeCreations   SectionCode[]      @relation("CodeCreator")
   gradesGiven     EssayGrade[]       @relation("Grader")
+  invitesSent     Invite[]           @relation("InviteSender")
+  invitesAccepted Invite[]           @relation("InviteAcceptor")
 }
 
 model RoleChange {
@@ -120,6 +123,7 @@ model Section {
   codes       SectionCode[]
   enrollments Enrollment[]
   assignments SectionAssignment[]
+  invites     Invite[]
 }
 
 model SectionInstructor {
@@ -340,4 +344,25 @@ model EssayGrade {
   response Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
   attempt  Attempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
   grader   User     @relation("Grader", fields: [gradedById], references: [id])
+}
+
+model Invite {
+  id           String    @id @default(cuid())
+  token        String    @unique
+  email        String
+  role         Role?
+  sectionId    String?
+  message      String?   @db.Text
+  invitedById  String
+  expiresAt    DateTime
+  acceptedAt   DateTime?
+  acceptedById String?
+  createdAt    DateTime  @default(now())
+
+  invitedBy User      @relation("InviteSender", fields: [invitedById], references: [id])
+  acceptedBy User?    @relation("InviteAcceptor", fields: [acceptedById], references: [id])
+  section   Section?  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@index([email])
+  @@index([sectionId])
 }

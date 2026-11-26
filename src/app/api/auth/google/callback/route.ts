@@ -100,7 +100,11 @@ export async function GET(req: NextRequest) {
   });
 
   const token = await createSessionToken(user.id);
-  const res = NextResponse.redirect(new URL(homePathFor(user.role), url.origin));
+  const next = req.cookies.get('qv_next')?.value;
+  const dest =
+    next && next.startsWith('/') && !next.startsWith('//') ? next : homePathFor(user.role);
+  const res = NextResponse.redirect(new URL(dest, url.origin));
+  res.cookies.delete('qv_next');
   res.cookies.set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: 'lax',
