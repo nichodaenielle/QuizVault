@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import {
   publishAssessment,
   removeAssignment,
+  restoreAssessment,
   saveAssessmentDraft,
   setAssessmentStatus,
   updateAssignmentSettings,
@@ -341,6 +342,11 @@ export function Studio({
             </ul>
           )}
           <div className="flex flex-wrap gap-2">
+            {status === 'ARCHIVED' && (
+              <Button type="button" onClick={() => act(() => restoreAssessment(assessmentId), 'Assessment restored')}>
+                Restore assessment
+              </Button>
+            )}
             <Button type="button" onClick={publish} disabled={!editable || items.length === 0 || selectedSections.length === 0}>
               {status === 'PUBLISHED' ? 'Publish new version' : 'Publish'}
             </Button>

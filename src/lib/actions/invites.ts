@@ -130,17 +130,21 @@ export async function acceptInvite(
   const name = input.name?.trim();
   const details = input.details?.trim();
   let finalRole = user.role;
+  // Invites may only raise a role, never lower it (e.g. an instructor
+  // accepting a learner invite must not be demoted).
+  const ROLE_RANK: Record<Role, number> = { LEARNER: 0, INSTRUCTOR: 1, ADMIN: 2 };
+  const grantRole = invite.role && ROLE_RANK[invite.role] > ROLE_RANK[user.role] ? invite.role : null;
 
   await prisma.$transaction(async (tx) => {
     const data: Prisma.UserUpdateInput = {};
     if (name) data.name = name;
     if (details !== undefined) data.details = details || null;
-    if (invite.role && invite.role !== user.role) {
+    if (grantRole) {
       await tx.roleChange.create({
-        data: { userId: user.id, fromRole: user.role, toRole: invite.role, changedBy: invite.invitedById },
+        data: { userId: user.id, fromRole: user.role, toRole: grantRole, changedBy: invite.invitedById },
       });
-      data.role = invite.role;
-      finalRole = invite.role;
+      data.role = grantRole;
+      finalRole = grantRole;
     }
     if (Object.keys(data).length) {
       await tx.user.update({ where: { id: user.id }, data });

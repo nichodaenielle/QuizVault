@@ -8,12 +8,18 @@ import { SetRowActions } from './row-actions';
 
 export const dynamic = 'force-dynamic';
 
-export default async function SetsPage() {
+export default async function SetsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   const user = await requireRole('INSTRUCTOR', 'ADMIN');
+  const sp = await searchParams;
+  const archivedFilter = sp.archived === '1' ? true : sp.archived === 'all' ? undefined : false;
   const sets = await prisma.questionSet.findMany({
     where: {
       ...(user.role === 'INSTRUCTOR' ? { ownerId: user.id } : {}),
-      archived: false,
+      ...(archivedFilter !== undefined ? { archived: archivedFilter } : {}),
     },
     include: {
       _count: { select: { items: true } },
@@ -36,6 +42,25 @@ export default async function SetsPage() {
       ]}
     >
       <PageHeader title="Question sets" subtitle="Reusable groups of questions for assessments." />
+      <div className="mb-4 flex gap-2 text-sm">
+        {[
+          { v: '', label: 'Active' },
+          { v: '1', label: 'Archived' },
+          { v: 'all', label: 'All' },
+        ].map((f) => (
+          <Link
+            key={f.v}
+            href={f.v ? `/teach/sets?archived=${f.v}` : '/teach/sets'}
+            className={`rounded-lg border px-3 py-1.5 ${
+              (sp.archived ?? '') === f.v
+                ? 'border-pine-900 bg-pine-900 text-ivory-50'
+                : 'border-ink-400/30 text-ink-600 hover:bg-pine-50'
+            }`}
+          >
+            {f.label}
+          </Link>
+        ))}
+      </div>
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           {sets.length === 0 ? (
@@ -53,7 +78,12 @@ export default async function SetsPage() {
                   <td className="px-4 py-3"><Badge tone="neutral">{s._count.items}</Badge></td>
                   <td className="px-4 py-3 text-ink-600">{s.owner.name ?? s.owner.email}</td>
                   <td className="px-4 py-3 text-ink-600">{s.updatedAt.toLocaleDateString()}</td>
-                  <td className="px-4 py-3"><SetRowActions id={s.id} /></td>
+                  <td className="px-4 py-3">
+                    <span className="flex items-center gap-2">
+                      {s.archived && <Badge tone="gold">Archived</Badge>}
+                      <SetRowActions id={s.id} archived={s.archived} />
+                    </span>
+                  </td>
                 </tr>
               ))}
             </Table>

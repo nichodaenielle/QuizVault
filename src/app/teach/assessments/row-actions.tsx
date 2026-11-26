@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { deleteAssessment, setAssessmentStatus } from '@/lib/actions/assessments';
+import { deleteAssessment, restoreAssessment, setAssessmentStatus } from '@/lib/actions/assessments';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { useToast } from '@/components/toast';
 
@@ -46,6 +46,11 @@ export function AssessmentRowActions({ id, status }: { id: string; status: strin
           className="text-sm text-red-700 hover:underline"
         >
           Delete
+        </button>
+      )}
+      {status === 'ARCHIVED' && (
+        <button type="button" disabled={busy} onClick={() => act(() => restoreAssessment(id), 'Assessment restored')} className="text-sm text-pine-900 hover:underline">
+          Restore
         </button>
       )}
       {error && <span role="alert" className="text-xs text-red-700">{error}</span>}

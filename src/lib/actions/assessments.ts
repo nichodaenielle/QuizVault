@@ -116,10 +116,11 @@ async function resolveSnapshot(a: { id: string; title: string; mode: AssessmentM
     if (item.kind === 'QUESTION') {
       const q = await prisma.question.findUnique({ where: { id: item.questionId } });
       if (!q) return { error: `Question ${item.questionId} not found.` } as const;
+      if (q.archived) continue;
       pushQuestion(q);
     } else if (item.kind === 'SET') {
       const rows = await prisma.questionSetItem.findMany({
-        where: { setId: item.setId },
+        where: { setId: item.setId, question: { archived: false } },
         orderBy: { order: 'asc' },
         include: { question: true },
       });
@@ -230,11 +231,31 @@ export async function setAssessmentStatus(id: string, status: 'CLOSED' | 'PUBLIS
   const user = await requireRole('INSTRUCTOR', 'ADMIN');
   const a = await ownedAssessment(id, user.id, user.role === 'ADMIN');
   if (!a) return { ok: false, error: 'Assessment not found.' };
+  if (a.status === 'ARCHIVED') {
+    return { ok: false, error: 'Archived assessments must be restored first.' };
+  }
   if (status === 'PUBLISHED' && a.status === 'DRAFT') {
     return { ok: false, error: 'Publish the draft first.' };
   }
   await prisma.assessment.update({ where: { id }, data: { status } });
   await audit(user.id, `ASSESSMENT_${status}`, 'Assessment', id);
+  revalidatePath('/teach/assessments');
+  revalidatePath(`/teach/assessments/${id}`);
+  return { ok: true };
+}
+
+/** Restore an archived assessment: back to PUBLISHED if it has versions, else DRAFT. */
+export async function restoreAssessment(id: string): Promise<ActionResult> {
+  const user = await requireRole('INSTRUCTOR', 'ADMIN');
+  const a = await ownedAssessment(id, user.id, user.role === 'ADMIN');
+  if (!a) return { ok: false, error: 'Assessment not found.' };
+  if (a.status !== 'ARCHIVED') return { ok: false, error: 'Only archived assessments can be restored.' };
+  const hasVersion = (await prisma.assessmentVersion.count({ where: { assessmentId: id } })) > 0;
+  await prisma.assessment.update({
+    where: { id },
+    data: { status: hasVersion ? 'PUBLISHED' : 'DRAFT' },
+  });
+  await audit(user.id, 'ASSESSMENT_RESTORED', 'Assessment', id, { to: hasVersion ? 'PUBLISHED' : 'DRAFT' });
   revalidatePath('/teach/assessments');
   revalidatePath(`/teach/assessments/${id}`);
   return { ok: true };
