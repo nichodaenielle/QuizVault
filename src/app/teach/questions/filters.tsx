@@ -46,6 +46,7 @@ export function QuestionFilters({
           <option value="SHORT_ANSWER">Short answer</option>
           <option value="IDENTIFICATION">Identification</option>
           <option value="ESSAY">Essay</option>
+          <option value="ORDERING">Ordering</option>
         </select>
       </div>
       <div>

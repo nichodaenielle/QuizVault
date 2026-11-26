@@ -25,6 +25,12 @@ function describeAnswer(item: SnapshotItem, answer: AnswerValue): string {
       const sel = new Set(Array.isArray(answer) ? answer : []);
       return opts.filter((o) => sel.has(o.id)).map((o) => o.text).join('; ') || 'No answer';
     }
+    case 'ORDERING': {
+      const opts = (p.items as { id: string; text: string }[]) ?? [];
+      const byId = new Map(opts.map((o) => [o.id, o.text]));
+      const seq = (Array.isArray(answer) ? answer : []).map((id) => byId.get(String(id)) ?? String(id));
+      return seq.length ? seq.join(' → ') : 'No answer';
+    }
     case 'ESSAY':
       return typeof answer === 'string' ? answer : 'No answer';
     default:
@@ -45,6 +51,12 @@ function correctAnswerText(item: SnapshotItem): string {
       const opts = (p.options as { id: string; text: string }[]) ?? [];
       const sel = new Set<string>((p.correctIds as string[] | undefined) ?? []);
       return opts.filter((o) => sel.has(o.id)).map((o) => o.text).join('; ') || '—';
+    }
+    case 'ORDERING': {
+      const opts = (p.items as { id: string; text: string }[]) ?? [];
+      const byId = new Map(opts.map((o) => [o.id, o.text]));
+      const order = (p.correctOrder as string[] | undefined) ?? [];
+      return order.map((id) => byId.get(id) ?? id).join(' → ') || '—';
     }
     case 'SHORT_ANSWER':
     case 'IDENTIFICATION':

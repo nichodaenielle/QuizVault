@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { McOption } from '@/lib/questions';
 import { useRouter } from 'next/navigation';
 import type { AnswerValue, SnapshotItem } from '@/lib/questions';
 import { cn } from '@/lib/utils';
@@ -600,6 +601,15 @@ function AnswerInput({
           className="max-w-xl"
         />
       );
+    case 'ORDERING':
+      return (
+        <OrderingInput
+          key={item.key}
+          items={payload.items as McOption[]}
+          answer={answer}
+          onChange={onChange}
+        />
+      );
     case 'ESSAY': {
       const text = typeof answer === 'string' ? answer : '';
       const words = text.trim() ? text.trim().split(/\s+/).length : 0;
@@ -623,4 +633,67 @@ function AnswerInput({
     default:
       return null;
   }
+}
+
+function OrderingInput({
+  items,
+  answer,
+  onChange,
+}: {
+  items: McOption[];
+  answer: AnswerValue;
+  onChange: (v: AnswerValue) => void;
+}) {
+  const [order, setOrder] = useState<string[]>(() => {
+    const saved = Array.isArray(answer) ? answer.filter((id): id is string => typeof id === 'string') : [];
+    const valid = saved.filter((id) => items.some((i) => i.id === id));
+    const rest = items.map((i) => i.id).filter((id) => !valid.includes(id));
+    return [...valid, ...rest];
+  });
+  const byId = new Map(items.map((i) => [i.id, i]));
+
+  function move(index: number, dir: -1 | 1) {
+    const j = index + dir;
+    if (j < 0 || j >= order.length) return;
+    const next = [...order];
+    [next[index], next[j]] = [next[j], next[index]];
+    setOrder(next);
+    onChange(next);
+  }
+
+  return (
+    <div>
+      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-ink-600">Put the items in the correct order</p>
+      <ol className="space-y-2">
+        {order.map((id, i) => {
+          const item = byId.get(id);
+          if (!item) return null;
+          return (
+            <li key={id} className="flex items-center gap-2 rounded-lg border border-ink-400/30 bg-ivory-50 px-3 py-2.5">
+              <span className="w-6 shrink-0 text-center text-sm font-semibold text-ink-400">{i + 1}.</span>
+              <span className="min-w-0 flex-1 text-sm text-ink-900">{item.text}</span>
+              <button
+                type="button"
+                disabled={i === 0}
+                onClick={() => move(i, -1)}
+                className="rounded border border-ink-400/30 px-2 py-0.5 text-xs text-ink-600 hover:bg-pine-50 disabled:opacity-40"
+                aria-label={`Move item ${i + 1} up`}
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                disabled={i === order.length - 1}
+                onClick={() => move(i, 1)}
+                className="rounded border border-ink-400/30 px-2 py-0.5 text-xs text-ink-600 hover:bg-pine-50 disabled:opacity-40"
+                aria-label={`Move item ${i + 1} down`}
+              >
+                ↓
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
 }

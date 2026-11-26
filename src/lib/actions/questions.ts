@@ -42,7 +42,13 @@ function normalizePayload(type: QuestionType, raw: unknown): QuestionPayload | n
         .map((o) => ({ id: String((o as McOption).id || optId()), text: String((o as McOption).text ?? '').trim() }))
         .filter((o) => o.text);
       const correctIds = Array.isArray(p.correctIds) ? p.correctIds.map(String) : [];
-      return { options, correctIds, hint: hintOf(p) };
+      return { options, correctIds, partialCredit: p.partialCredit === true || undefined, hint: hintOf(p) };
+    }
+    case 'ORDERING': {
+      const items: McOption[] = (Array.isArray(p.items) ? p.items : [])
+        .map((o) => ({ id: String((o as McOption).id || optId()), text: String((o as McOption).text ?? '').trim() }))
+        .filter((o) => o.text);
+      return { items, correctOrder: items.map((i) => i.id), hint: hintOf(p) };
     }
     case 'SHORT_ANSWER':
     case 'IDENTIFICATION':

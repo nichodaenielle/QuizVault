@@ -19,7 +19,8 @@ export type QuestionPayload =
   | { options: McOption[]; correctIds: string[]; partialCredit?: boolean; hint?: string } // MULTIPLE_SELECT
   | { answers: string[]; caseSensitive: boolean; hint?: string } // SHORT_ANSWER
   | { answers: string[]; caseSensitive: boolean; hint?: string } // IDENTIFICATION
-  | { wordLimit?: number; rubric?: RubricCriterion[]; hint?: string }; // ESSAY
+  | { wordLimit?: number; rubric?: RubricCriterion[]; hint?: string } // ESSAY
+  | { items: McOption[]; correctOrder: string[]; hint?: string }; // ORDERING — items[i].id order is the key
 
 export interface SnapshotItem {
   key: string;
@@ -120,6 +121,12 @@ export function autoGrade(
       const norm = normalizeText(answer, p.caseSensitive);
       return p.answers.some((a) => normalizeText(a, p.caseSensitive) === norm) ? points : 0;
     }
+    case 'ORDERING': {
+      const p = payload as { correctOrder?: string[] };
+      const c = p.correctOrder ?? [];
+      if (!Array.isArray(answer) || answer.length !== c.length) return 0;
+      return answer.every((v, i) => v === c[i]) ? points : 0;
+    }
     case 'ESSAY':
       return null; // manual grading
     default:
@@ -167,6 +174,13 @@ export function validatePayload(type: QuestionType, payload: unknown): string | 
       const sa = p as { answers?: string[] };
       if (!Array.isArray(sa.answers) || sa.answers.filter((a) => a.trim()).length === 0)
         return 'Provide at least one acceptable answer.';
+      return null;
+    }
+    case 'ORDERING': {
+      const o = p as { items?: McOption[] };
+      if (!Array.isArray(o.items) || o.items.length < 2) return 'Ordering needs at least two items.';
+      if (o.items.some((i) => !i.id || !i.text?.trim())) return 'Every item needs text.';
+      if (new Set(o.items.map((i) => i.id)).size !== o.items.length) return 'Item ids must be unique.';
       return null;
     }
     case 'ESSAY': {

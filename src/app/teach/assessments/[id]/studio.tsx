@@ -38,7 +38,7 @@ interface VersionRow { version: number; publishedAt: string }
 
 const TYPE_LABEL: Record<string, string> = {
   TRUE_FALSE: 'T/F', MULTIPLE_CHOICE: 'MC', MULTIPLE_SELECT: 'MS',
-  SHORT_ANSWER: 'Short', IDENTIFICATION: 'ID', ESSAY: 'Essay',
+  SHORT_ANSWER: 'Short', IDENTIFICATION: 'ID', ESSAY: 'Essay', ORDERING: 'Order',
 };
 
 export function Studio({

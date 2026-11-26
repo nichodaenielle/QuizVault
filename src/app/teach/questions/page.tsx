@@ -16,6 +16,7 @@ const TYPE_LABEL: Record<string, string> = {
   SHORT_ANSWER: 'Short answer',
   IDENTIFICATION: 'Identification',
   ESSAY: 'Essay',
+  ORDERING: 'Ordering',
 };
 
 export default async function QuestionsPage({

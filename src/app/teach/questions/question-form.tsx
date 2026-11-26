@@ -31,6 +31,7 @@ const TYPES: { value: QuestionType; label: string }[] = [
   { value: 'SHORT_ANSWER', label: 'Typed short answer' },
   { value: 'IDENTIFICATION', label: 'Identification' },
   { value: 'ESSAY', label: 'Long essay' },
+  { value: 'ORDERING', label: 'Ordering' },
 ];
 
 export function QuestionForm({ initial }: Props) {
@@ -57,6 +58,7 @@ export function QuestionForm({ initial }: Props) {
     wordLimit?: number;
     rubric?: RubricCriterion[];
     correct?: boolean;
+    items?: { id: string; text: string }[];
     hint?: string;
   };
   const [tfCorrect, setTfCorrect] = useState<boolean>(p.correct === true);
@@ -73,6 +75,12 @@ export function QuestionForm({ initial }: Props) {
   const [caseSensitive, setCaseSensitive] = useState(p.caseSensitive === true);
   const [wordLimit, setWordLimit] = useState<number | ''>(p.wordLimit ?? '');
   const [rubric, setRubric] = useState<RubricCriterion[]>(p.rubric ?? []);
+  const [orderItems, setOrderItems] = useState<{ id: string; text: string }[]>(
+    p.items ?? [
+      { id: crypto.randomUUID().slice(0, 8), text: '' },
+      { id: crypto.randomUUID().slice(0, 8), text: '' },
+    ],
+  );
 
   function payloadFor(t: QuestionType): unknown {
     switch (t) {
@@ -95,6 +103,8 @@ export function QuestionForm({ initial }: Props) {
           rubric: rubric.length ? rubric : undefined,
           hint: hint || undefined,
         };
+      case 'ORDERING':
+        return { items: orderItems, hint: hint || undefined };
     }
   }
 
@@ -311,6 +321,76 @@ export function QuestionForm({ initial }: Props) {
                 + Add criterion
               </Button>
             </div>
+          </div>
+        )}
+
+        {type === 'ORDERING' && (
+          <div className="space-y-3">
+            <div>
+              <p className="mb-1 text-sm font-medium text-ink-900">Items — list them in the correct order</p>
+              <p className="mb-2 text-xs text-ink-600">Learners see these shuffled and must put them back in order. Wrong order scores 0.</p>
+            </div>
+            <ol className="space-y-2">
+              {orderItems.map((o, i) => (
+                <li key={o.id} className="flex items-center gap-2 rounded-lg border border-ink-400/20 p-2">
+                  <span className="w-6 shrink-0 text-center text-sm font-semibold text-ink-400">{i + 1}.</span>
+                  <input
+                    value={o.text}
+                    onChange={(e) =>
+                      setOrderItems((items) => items.map((x) => (x.id === o.id ? { ...x, text: e.target.value } : x)))
+                    }
+                    placeholder={`Item ${i + 1}`}
+                    className="flex-1"
+                  />
+                  <button
+                    type="button"
+                    disabled={i === 0}
+                    onClick={() =>
+                      setOrderItems((items) => {
+                        const n = [...items];
+                        [n[i - 1], n[i]] = [n[i], n[i - 1]];
+                        return n;
+                      })
+                    }
+                    className="rounded border border-ink-400/30 px-2 py-0.5 text-xs text-ink-600 hover:bg-pine-50 disabled:opacity-40"
+                    aria-label={`Move item ${i + 1} up`}
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    disabled={i === orderItems.length - 1}
+                    onClick={() =>
+                      setOrderItems((items) => {
+                        const n = [...items];
+                        [n[i], n[i + 1]] = [n[i + 1], n[i]];
+                        return n;
+                      })
+                    }
+                    className="rounded border border-ink-400/30 px-2 py-0.5 text-xs text-ink-600 hover:bg-pine-50 disabled:opacity-40"
+                    aria-label={`Move item ${i + 1} down`}
+                  >
+                    ↓
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOrderItems((items) => items.filter((x) => x.id !== o.id))}
+                    className="text-sm text-red-700 hover:underline"
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ol>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() =>
+                setOrderItems((items) => [...items, { id: crypto.randomUUID().slice(0, 8), text: '' }])
+              }
+            >
+              + Add item
+            </Button>
           </div>
         )}
       </Card>

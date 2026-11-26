@@ -20,6 +20,7 @@ const TYPE_LABEL: Record<string, string> = {
   SHORT_ANSWER: 'Short',
   IDENTIFICATION: 'ID',
   ESSAY: 'Essay',
+  ORDERING: 'Order',
 };
 
 interface Item {

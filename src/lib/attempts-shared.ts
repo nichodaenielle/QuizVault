@@ -18,8 +18,13 @@ export function learnerPayload(item: SnapshotItem): SnapshotItem['payload'] {
   delete p.correct;
   delete p.correctId;
   delete p.correctIds;
+  delete p.correctOrder;
   delete p.answers;
   delete p.rubric;
+  // Ordering items are stored in correct sequence — always shuffle for learners.
+  if (item.type === 'ORDERING' && Array.isArray(p.items)) {
+    p.items = shuffle(p.items as { id: string; text: string }[]);
+  }
   return p as SnapshotItem['payload'];
 }
 
