@@ -35,11 +35,11 @@ export default async function EditQuestionPage({
         { href: '/teach/grading', label: 'Grading' },
       ]}
     >
-      <PageHeader
-        title={q.archived ? 'View question' : 'Edit question'}
-        subtitle={`Version ${q.version} · by ${q.owner.name ?? q.owner.email} · edits never change already-published attempts`}
-      />
       <div className="mx-auto max-w-3xl">
+        <PageHeader
+          title={q.archived ? 'View question' : 'Edit question'}
+          subtitle={`Version ${q.version} · by ${q.owner.name ?? q.owner.email} · edits never change already-published attempts`}
+        />
         <QuestionForm
           initial={{
             id: q.id,

@@ -20,8 +20,8 @@ export default async function NewAssessmentPage() {
         { href: '/teach/grading', label: 'Grading' },
       ]}
     >
-      <PageHeader title="New assessment" subtitle="Choose a mode — any mode supports all question types." />
       <div className="mx-auto max-w-xl">
+        <PageHeader title="New assessment" subtitle="Choose a mode — any mode supports all question types." />
         <AssessmentForm />
       </div>
     </AppShell>

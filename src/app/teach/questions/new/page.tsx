@@ -20,8 +20,8 @@ export default async function NewQuestionPage() {
         { href: '/teach/grading', label: 'Grading' },
       ]}
     >
-      <PageHeader title="New question" subtitle="Add a question to your bank." />
       <div className="mx-auto max-w-3xl">
+        <PageHeader title="New question" subtitle="Add a question to your bank." />
         <QuestionForm />
       </div>
     </AppShell>
