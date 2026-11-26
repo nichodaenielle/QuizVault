@@ -35,7 +35,7 @@ export default async function AdminPage() {
       }),
       prisma.auditLog.findMany({
         orderBy: { createdAt: 'desc' },
-        take: 15,
+        take: 10,
         include: { actor: { select: { name: true, email: true } } },
       }),
     ]);
@@ -66,7 +66,7 @@ export default async function AdminPage() {
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid items-start gap-6 lg:grid-cols-3">
         <Card className="p-5">
           <h2 className="mb-3 font-semibold text-ink-900">Users by role</h2>
           <ul className="space-y-2">
@@ -109,7 +109,7 @@ export default async function AdminPage() {
           {activity.length === 0 ? (
             <p className="text-sm text-ink-600">No recorded activity yet.</p>
           ) : (
-            <ul className="max-h-80 space-y-2 overflow-y-auto pr-1">
+            <ul className="max-h-52 space-y-1.5 overflow-y-auto pr-1">
               {activity.map((a) => (
                 <li key={a.id} className="text-sm">
                   <span className="font-medium text-ink-900">{humanize(a.action)}</span>
