@@ -83,9 +83,8 @@ export function InviteManager({
           <Field label="Role on accept" htmlFor="role" hint="Optional — grants this role when they accept.">
             <select id="role" name="role" defaultValue="">
               <option value="">No role change</option>
-              <option value="LEARNER">Learner</option>
+              <option value="LEARNER">Learner (student)</option>
               <option value="INSTRUCTOR">Instructor</option>
-              <option value="ADMIN">Admin</option>
             </select>
           </Field>
         )}

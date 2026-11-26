@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { SessionUser } from '@/lib/auth';
+import { ViewSwitcher } from './view-switcher';
 import type { ReactNode } from 'react';
 
 export interface NavItem {
@@ -40,6 +41,7 @@ export function AppShell({
               </Link>
             ))}
           </nav>
+          <ViewSwitcher role={user.role} />
           <div className="ml-auto flex items-center gap-3">
             <span className="hidden text-sm text-ivory-50/80 sm:inline">
               {user.name ?? user.email}

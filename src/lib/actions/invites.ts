@@ -29,6 +29,9 @@ export async function createInvite(
   let role: Role | null = null;
   if (input.role) {
     if (user.role !== 'ADMIN') return { ok: false, error: 'Only admins can invite with a role.' };
+    if (input.role !== 'LEARNER' && input.role !== 'INSTRUCTOR') {
+      return { ok: false, error: 'Invites can only grant Learner or Instructor roles.' };
+    }
     role = input.role;
   }
 

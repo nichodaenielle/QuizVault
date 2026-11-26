@@ -22,7 +22,6 @@ export default async function AdminInvitesPage() {
         { href: '/admin/users', label: 'Users & roles' },
         { href: '/admin/sections', label: 'Sections' },
         { href: '/admin/invites', label: 'Invites' },
-        { href: '/teach', label: 'Instructor view' },
       ]}
     >
       <PageHeader
