@@ -20,7 +20,7 @@ export function AppShell({
   return (
     <div className="min-h-screen bg-ivory-50">
       <header className="sticky top-0 z-40 bg-pine-900 text-ivory-50 shadow-md">
-        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
+        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5">
           <Link href="/dashboard" className="flex items-center gap-2 font-semibold tracking-tight">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -30,7 +30,10 @@ export function AppShell({
             />
             QuizVault
           </Link>
-          <nav aria-label="Main" className="ml-2 hidden flex-1 gap-1 overflow-x-auto md:flex">
+          <nav
+            aria-label="Main"
+            className="ml-1 hidden min-w-0 flex-1 gap-0.5 overflow-x-auto lg:flex [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
             {nav.map((item) => (
               <Link
                 key={item.href}
@@ -43,7 +46,7 @@ export function AppShell({
           </nav>
           <ViewSwitcher role={user.role} />
           <div className="ml-auto flex items-center gap-3">
-            <span className="hidden text-sm text-ivory-50/80 sm:inline">
+            <span className="hidden text-sm text-ivory-50/80 lg:inline">
               {user.name ?? user.email}
               <span className="ml-1 rounded bg-pine-800 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gold-100">
                 {user.role}
@@ -59,7 +62,10 @@ export function AppShell({
             </form>
           </div>
         </div>
-        <nav aria-label="Main mobile" className="flex gap-1 overflow-x-auto px-4 pb-2 md:hidden">
+        <nav
+          aria-label="Main mobile"
+          className="flex gap-1 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:hidden"
+        >
           {nav.map((item) => (
             <Link
               key={item.href}

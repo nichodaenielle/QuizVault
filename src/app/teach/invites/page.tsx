@@ -32,7 +32,6 @@ export default async function TeachInvitesPage() {
         { href: '/teach/sets', label: 'Question sets' },
         { href: '/teach/assessments', label: 'Assessments' },
         { href: '/teach/invites', label: 'Invites' },
-        { href: '/teach/invites', label: 'Invites' },
         { href: '/teach/grading', label: 'Grading' },
       ]}
     >
