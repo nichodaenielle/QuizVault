@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { gradeEssay } from '@/lib/actions/assessments';
 import { Button, Field } from '@/components/ui';
+import { useToast } from '@/components/toast';
 import type { RubricCriterion } from '@/lib/questions';
 
 export function GradeForm({
@@ -18,6 +19,7 @@ export function GradeForm({
   rubric?: RubricCriterion[];
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [score, setScore] = useState(existing?.score ?? '');
   const [feedback, setFeedback] = useState(existing?.feedback ?? '');
   const [rubricScores, setRubricScores] = useState<Record<string, number>>(() => {
@@ -46,6 +48,7 @@ export function GradeForm({
       setError(res.error ?? 'Failed.');
       return;
     }
+    toast('Grade saved');
     router.push('/teach/grading');
     router.refresh();
   }

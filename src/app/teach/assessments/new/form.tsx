@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { createAssessment } from '@/lib/actions/assessments';
 import type { AssessmentMode } from '@prisma/client';
 import { Button, Card, Field } from '@/components/ui';
+import { useToast } from '@/components/toast';
 
 const MODES: { value: AssessmentMode; label: string; hint: string }[] = [
   { value: 'REVIEWER', label: 'Reviewer', hint: 'Self-paced practice with hints, explanations, and repeat attempts.' },
@@ -14,6 +15,7 @@ const MODES: { value: AssessmentMode; label: string; hint: string }[] = [
 
 export function AssessmentForm() {
   const router = useRouter();
+  const toast = useToast();
   const [mode, setMode] = useState<AssessmentMode>('QUIZ');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -33,6 +35,7 @@ export function AssessmentForm() {
       setError(res.error ?? 'Failed.');
       return;
     }
+    toast('Assessment created');
     router.push(`/teach/assessments/${res.id}`);
     router.refresh();
   }

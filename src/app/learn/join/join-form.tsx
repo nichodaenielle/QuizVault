@@ -4,9 +4,11 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { joinSection } from '@/lib/actions/sections';
 import { Button, Card, Field } from '@/components/ui';
+import { useToast } from '@/components/toast';
 
 export function JoinForm() {
   const router = useRouter();
+  const toast = useToast();
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -21,6 +23,7 @@ export function JoinForm() {
       setError(res.error ?? 'Could not join.');
       return;
     }
+    toast('Joined the section');
     router.push('/learn');
     router.refresh();
   }

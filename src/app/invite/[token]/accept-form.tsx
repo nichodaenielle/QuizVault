@@ -4,9 +4,11 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { acceptInvite } from '@/lib/actions/invites';
 import { Button, Field } from '@/components/ui';
+import { useToast } from '@/components/toast';
 
 export function InviteAcceptForm({ token, defaultName }: { token: string; defaultName: string }) {
   const router = useRouter();
+  const toast = useToast();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -24,6 +26,7 @@ export function InviteAcceptForm({ token, defaultName }: { token: string; defaul
       setError(res.error ?? 'Could not accept invite.');
       return;
     }
+    toast('Invite accepted — welcome aboard');
     router.push(res.redirect ?? '/dashboard');
     router.refresh();
   }

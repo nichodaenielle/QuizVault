@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { createInvite, listInvites, revokeInvite } from '@/lib/actions/invites';
 import { Badge, Button, Field } from '@/components/ui';
 import { ConfirmDialog } from '@/components/confirm-dialog';
+import { useToast } from '@/components/toast';
 import type { Role } from '@prisma/client';
 
 type InviteRow = {
@@ -34,6 +35,7 @@ export function InviteManager({
   sections: { id: string; name: string }[];
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [invites, setInvites] = useState(initialInvites);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -63,6 +65,7 @@ export function InviteManager({
       return;
     }
     (e.target as HTMLFormElement).reset();
+    toast('Invite link created — copy it below');
     await refresh();
   }
 
@@ -162,6 +165,7 @@ export function InviteManager({
           await revokeInvite(revoking.id);
           setBusy(false);
           setRevoking(null);
+          toast('Invite revoked');
           await refresh();
         }}
         onCancel={() => setRevoking(null)}

@@ -4,9 +4,11 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { setSetArchived } from '@/lib/actions/sets';
 import { ConfirmDialog } from '@/components/confirm-dialog';
+import { useToast } from '@/components/toast';
 
 export function SetRowActions({ id }: { id: string }) {
   const router = useRouter();
+  const toast = useToast();
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState(false);
   return (
@@ -30,6 +32,7 @@ export function SetRowActions({ id }: { id: string }) {
           await setSetArchived(id, true);
           setBusy(false);
           setConfirming(false);
+          toast('Set archived');
           router.refresh();
         }}
         onCancel={() => setConfirming(false)}

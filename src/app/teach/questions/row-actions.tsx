@@ -3,9 +3,11 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { duplicateQuestion, setQuestionArchived } from '@/lib/actions/questions';
+import { useToast } from '@/components/toast';
 
 export function QuestionRowActions({ id, archived }: { id: string; archived: boolean }) {
   const router = useRouter();
+  const toast = useToast();
   const [busy, setBusy] = useState(false);
 
   return (
@@ -17,6 +19,7 @@ export function QuestionRowActions({ id, archived }: { id: string; archived: boo
           setBusy(true);
           await duplicateQuestion(id);
           setBusy(false);
+          toast('Question duplicated');
           router.refresh();
         }}
         className="text-sm text-pine-900 hover:underline disabled:opacity-50"
@@ -30,6 +33,7 @@ export function QuestionRowActions({ id, archived }: { id: string; archived: boo
           setBusy(true);
           await setQuestionArchived(id, !archived);
           setBusy(false);
+          toast(archived ? 'Question restored' : 'Question archived');
           router.refresh();
         }}
         className="text-sm text-ink-600 hover:underline disabled:opacity-50"

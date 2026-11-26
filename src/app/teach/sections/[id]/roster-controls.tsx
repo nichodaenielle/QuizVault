@@ -4,9 +4,11 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { removeEnrollment } from '@/lib/actions/sections';
 import { ConfirmDialog } from '@/components/confirm-dialog';
+import { useToast } from '@/components/toast';
 
 export function RosterControls({ sectionId, userId }: { sectionId: string; userId: string }) {
   const router = useRouter();
+  const toast = useToast();
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState(false);
 
@@ -31,6 +33,7 @@ export function RosterControls({ sectionId, userId }: { sectionId: string; userI
           await removeEnrollment(sectionId, userId);
           setBusy(false);
           setConfirming(false);
+          toast('Learner removed from section');
           router.refresh();
         }}
         onCancel={() => setConfirming(false)}

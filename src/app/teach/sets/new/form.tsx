@@ -4,9 +4,11 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { createSet } from '@/lib/actions/sets';
 import { Button, Field } from '@/components/ui';
+import { useToast } from '@/components/toast';
 
 export function CreateSetForm() {
   const router = useRouter();
+  const toast = useToast();
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -21,6 +23,7 @@ export function CreateSetForm() {
       setError(res.error ?? 'Failed.');
       return;
     }
+    toast('Set created');
     router.push(`/teach/sets/${res.id}`);
     router.refresh();
   }

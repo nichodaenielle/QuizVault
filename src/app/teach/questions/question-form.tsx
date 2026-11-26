@@ -6,6 +6,7 @@ import { createQuestion, updateQuestion, type QuestionInput } from '@/lib/action
 import type { QuestionPayload, RubricCriterion } from '@/lib/questions';
 import type { Difficulty, QuestionType } from '@prisma/client';
 import { Button, Card, Field } from '@/components/ui';
+import { useToast } from '@/components/toast';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -34,6 +35,7 @@ const TYPES: { value: QuestionType; label: string }[] = [
 
 export function QuestionForm({ initial }: Props) {
   const router = useRouter();
+  const toast = useToast();
   const [type, setType] = useState<QuestionType>(initial?.type ?? 'MULTIPLE_CHOICE');
   const [prompt, setPrompt] = useState(initial?.prompt ?? '');
   const [subject, setSubject] = useState(initial?.subject ?? '');
@@ -114,6 +116,7 @@ export function QuestionForm({ initial }: Props) {
       setError(res.error ?? 'Save failed.');
       return;
     }
+    toast(initial ? 'Question updated' : 'Question created');
     router.push('/teach/questions');
     router.refresh();
   }

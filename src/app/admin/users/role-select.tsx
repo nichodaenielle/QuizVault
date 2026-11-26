@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { changeUserRole } from '@/lib/actions/admin';
 import { ConfirmDialog } from '@/components/confirm-dialog';
+import { useToast } from '@/components/toast';
 import type { Role } from '@prisma/client';
 
 const ROLE_LABEL: Record<Role, string> = {
@@ -14,6 +15,7 @@ const ROLE_LABEL: Record<Role, string> = {
 
 export function RoleSelect({ userId, currentRole, isSelf }: { userId: string; currentRole: Role; isSelf: boolean }) {
   const router = useRouter();
+  const toast = useToast();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [pendingRole, setPendingRole] = useState<Role | null>(null);
@@ -31,6 +33,7 @@ export function RoleSelect({ userId, currentRole, isSelf }: { userId: string; cu
       setError(res.error ?? 'Failed.');
       return;
     }
+    toast('Role updated');
     router.refresh();
   }
 

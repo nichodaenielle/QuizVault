@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createInvite } from '@/lib/actions/invites';
 import { Button } from '@/components/ui';
+import { useToast } from '@/components/toast';
 
 export function InviteLearner({ sectionId, sectionName }: { sectionId: string; sectionName: string }) {
   const [email, setEmail] = useState('');
@@ -10,6 +11,7 @@ export function InviteLearner({ sectionId, sectionName }: { sectionId: string; s
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
+  const toast = useToast();
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -24,6 +26,7 @@ export function InviteLearner({ sectionId, sectionName }: { sectionId: string; s
     }
     setLink(`${window.location.origin}${res.path}`);
     setEmail('');
+    toast('Invite created — share the link below');
   }
 
   return (

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { assignInstructor, removeInstructor } from '@/lib/actions/sections';
 import { Button } from '@/components/ui';
+import { useToast } from '@/components/toast';
 
 export function InstructorControls({
   sectionId,
@@ -19,6 +20,7 @@ export function InstructorControls({
   canRemove?: boolean;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [selected, setSelected] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -46,6 +48,7 @@ export function InstructorControls({
             if (!res.ok) setError(res.error ?? 'Failed.');
             else {
               setSelected('');
+              toast('Instructor assigned');
               router.refresh();
             }
           }}
@@ -67,6 +70,7 @@ export function InstructorControls({
         setBusy(true);
         await removeInstructor(sectionId, userId);
         setBusy(false);
+        toast('Instructor removed');
         router.refresh();
       }}
       className="text-xs text-red-700 hover:underline disabled:opacity-50"

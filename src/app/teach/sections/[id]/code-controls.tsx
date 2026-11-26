@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { rotateSectionCode, updateCodeStatus } from '@/lib/actions/sections';
 import { Button } from '@/components/ui';
+import { useToast } from '@/components/toast';
 
 interface CodeRow {
   id: string;
@@ -14,15 +15,17 @@ interface CodeRow {
 
 export function CodeControls({ sectionId, codes }: { sectionId: string; codes: CodeRow[] }) {
   const router = useRouter();
+  const toast = useToast();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
-  async function act(fn: () => Promise<{ ok: boolean; error?: string }>) {
+  async function act(fn: () => Promise<{ ok: boolean; error?: string }>, done: string) {
     setBusy(true);
     setError('');
     const res = await fn();
     setBusy(false);
     if (!res.ok) setError(res.error ?? 'Action failed.');
+    else toast(done);
     router.refresh();
   }
 
@@ -39,7 +42,7 @@ export function CodeControls({ sectionId, codes }: { sectionId: string; codes: C
                   <button
                     type="button"
                     disabled={busy}
-                    onClick={() => act(() => updateCodeStatus(c.id, sectionId, 'ACTIVE'))}
+                    onClick={() => act(() => updateCodeStatus(c.id, sectionId, 'ACTIVE'), 'Code reactivated')}
                     className="text-pine-900 hover:underline"
                   >
                     reactivate
@@ -47,10 +50,10 @@ export function CodeControls({ sectionId, codes }: { sectionId: string; codes: C
                 )}
                 {c.status === 'ACTIVE' && (
                   <>
-                    <button type="button" disabled={busy} onClick={() => act(() => updateCodeStatus(c.id, sectionId, 'DISABLED'))} className="text-ink-600 hover:underline">
+                    <button type="button" disabled={busy} onClick={() => act(() => updateCodeStatus(c.id, sectionId, 'DISABLED'), 'Code disabled')} className="text-ink-600 hover:underline">
                       disable
                     </button>
-                    <button type="button" disabled={busy} onClick={() => act(() => updateCodeStatus(c.id, sectionId, 'EXPIRED'))} className="text-red-700 hover:underline">
+                    <button type="button" disabled={busy} onClick={() => act(() => updateCodeStatus(c.id, sectionId, 'EXPIRED'), 'Code expired')} className="text-red-700 hover:underline">
                       expire
                     </button>
                   </>
@@ -64,7 +67,7 @@ export function CodeControls({ sectionId, codes }: { sectionId: string; codes: C
         type="button"
         variant="secondary"
         disabled={busy}
-        onClick={() => act(() => rotateSectionCode(sectionId))}
+        onClick={() => act(() => rotateSectionCode(sectionId), 'New class code generated')}
         className="w-full"
       >
         {busy ? 'Working…' : 'Rotate / generate new code'}

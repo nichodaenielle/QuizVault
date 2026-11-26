@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { createSection } from '@/lib/actions/sections';
 import { Button, Field } from '@/components/ui';
+import { useToast } from '@/components/toast';
 
 export function CreateSectionForm({
   instructors,
@@ -13,6 +14,7 @@ export function CreateSectionForm({
   isAdmin: boolean;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -27,6 +29,7 @@ export function CreateSectionForm({
       setError(res.error ?? 'Failed to create section.');
       return;
     }
+    toast('Section created');
     router.push('/teach/sections');
     router.refresh();
   }

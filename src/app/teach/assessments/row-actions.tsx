@@ -4,19 +4,22 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { deleteAssessment, setAssessmentStatus } from '@/lib/actions/assessments';
 import { ConfirmDialog } from '@/components/confirm-dialog';
+import { useToast } from '@/components/toast';
 
 export function AssessmentRowActions({ id, status }: { id: string; status: string }) {
   const router = useRouter();
+  const toast = useToast();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
-  async function act(fn: () => Promise<{ ok: boolean; error?: string }>) {
+  async function act(fn: () => Promise<{ ok: boolean; error?: string }>, done: string) {
     setBusy(true);
     setError('');
     const res = await fn();
     setBusy(false);
     if (!res.ok) setError(res.error ?? 'Action failed.');
+    else toast(done);
     router.refresh();
   }
 
@@ -26,12 +29,12 @@ export function AssessmentRowActions({ id, status }: { id: string; status: strin
         Open
       </a>
       {status === 'PUBLISHED' && (
-        <button type="button" disabled={busy} onClick={() => act(() => setAssessmentStatus(id, 'CLOSED'))} className="text-sm text-ink-600 hover:underline">
+        <button type="button" disabled={busy} onClick={() => act(() => setAssessmentStatus(id, 'CLOSED'), 'Assessment closed')} className="text-sm text-ink-600 hover:underline">
           Close
         </button>
       )}
       {status === 'CLOSED' && (
-        <button type="button" disabled={busy} onClick={() => act(() => setAssessmentStatus(id, 'PUBLISHED'))} className="text-sm text-pine-900 hover:underline">
+        <button type="button" disabled={busy} onClick={() => act(() => setAssessmentStatus(id, 'PUBLISHED'), 'Assessment reopened')} className="text-sm text-pine-900 hover:underline">
           Reopen
         </button>
       )}
@@ -54,7 +57,7 @@ export function AssessmentRowActions({ id, status }: { id: string; status: strin
         busy={busy}
         onConfirm={() => {
           setConfirmingDelete(false);
-          void act(() => deleteAssessment(id));
+          void act(() => deleteAssessment(id), 'Assessment deleted');
         }}
         onCancel={() => setConfirmingDelete(false)}
       />

@@ -9,6 +9,7 @@ import {
   searchSetCandidates,
 } from '@/lib/actions/sets';
 import { Badge, Button } from '@/components/ui';
+import { useToast } from '@/components/toast';
 import { cn } from '@/lib/utils';
 import type { QuestionType } from '@prisma/client';
 
@@ -31,6 +32,7 @@ interface Item {
 
 export function SetItemsEditor({ setId, items }: { setId: string; items: Item[] }) {
   const router = useRouter();
+  const toast = useToast();
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -46,6 +48,7 @@ export function SetItemsEditor({ setId, items }: { setId: string; items: Item[] 
     setBusy(true);
     await removeSetItem(setId, questionId);
     setBusy(false);
+    toast('Question removed from set');
     router.refresh();
   }
 
@@ -155,6 +158,7 @@ export function AddQuestionPicker({
   candidates: Candidate[];
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
   const [query, setQuery] = useState('');
@@ -234,6 +238,7 @@ export function AddQuestionPicker({
               setSelected(new Set());
               setQuery('');
               setBusy(false);
+              toast(`${selected.size || 'Selected'} question${selected.size === 1 ? '' : 's'} added`);
               router.refresh();
             }}
           >

@@ -15,6 +15,7 @@ import {
 import { DEFAULT_RELEASE, type AssessmentSettings, type FeedbackRelease } from '@/lib/questions';
 import type { QuestionType } from '@prisma/client';
 import { Badge, Button, Card, Field } from '@/components/ui';
+import { useToast } from '@/components/toast';
 import { toLocalInputValue, fromLocalInputValue, formatDateTime } from '@/lib/time';
 
 interface QuestionOpt { id: string; prompt: string; type: QuestionType; points: number; topic: string; subject: string }
@@ -62,6 +63,7 @@ export function Studio({
   timezone: string;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [items, setItems] = useState<DraftItem[]>(initialDraft.items ?? []);
   const [settings, setSettings] = useState<AssessmentSettings>(initialDraft.settings ?? {});
   const [selectedSections, setSelectedSections] = useState<string[]>(initialDraft.settings?.sectionIds ?? []);
@@ -111,12 +113,19 @@ export function Studio({
     if (!saved) return;
     const res = await publishAssessment(assessmentId, selectedSections);
     setMessage(res.ok ? 'Published.' : res.error ?? 'Publish failed.');
+    if (res.ok) toast('Assessment published');
+    else toast(res.error ?? 'Publish failed.', 'error');
     router.refresh();
   }
 
-  async function act(fn: () => Promise<{ ok: boolean; error?: string }>) {
+  async function act(fn: () => Promise<{ ok: boolean; error?: string }>, done?: string) {
     const res = await fn();
-    if (!res.ok) setMessage(res.error ?? 'Action failed.');
+    if (!res.ok) {
+      setMessage(res.error ?? 'Action failed.');
+      toast(res.error ?? 'Action failed.', 'error');
+    } else if (done) {
+      toast(done);
+    }
     router.refresh();
   }
 
@@ -336,22 +345,22 @@ export function Studio({
               {status === 'PUBLISHED' ? 'Publish new version' : 'Publish'}
             </Button>
             {status === 'PUBLISHED' && (
-              <Button type="button" variant="secondary" onClick={() => act(() => setAssessmentStatus(assessmentId, 'CLOSED'))}>
+              <Button type="button" variant="secondary" onClick={() => act(() => setAssessmentStatus(assessmentId, 'CLOSED'), 'Assessment closed')}>
                 Close assessment
               </Button>
             )}
             {status === 'CLOSED' && (
-              <Button type="button" variant="secondary" onClick={() => act(() => setAssessmentStatus(assessmentId, 'PUBLISHED'))}>
+              <Button type="button" variant="secondary" onClick={() => act(() => setAssessmentStatus(assessmentId, 'PUBLISHED'), 'Assessment reopened')}>
                 Reopen
               </Button>
             )}
             {status !== 'ARCHIVED' && status !== 'DRAFT' && (
-              <Button type="button" variant="ghost" onClick={() => act(() => setAssessmentStatus(assessmentId, 'ARCHIVED'))}>
+              <Button type="button" variant="ghost" onClick={() => act(() => setAssessmentStatus(assessmentId, 'ARCHIVED'), 'Assessment archived')}>
                 Archive
               </Button>
             )}
             {isDraft && (
-              <Button type="button" variant="ghost" onClick={() => act(() => setAssessmentStatus(assessmentId, 'ARCHIVED'))}>
+              <Button type="button" variant="ghost" onClick={() => act(() => setAssessmentStatus(assessmentId, 'ARCHIVED'), 'Draft archived')}>
                 Archive draft
               </Button>
             )}
@@ -369,7 +378,7 @@ export function Studio({
           ) : (
             <ul className="space-y-3">
               {assignments.map((a) => (
-                <AssignmentSettings key={a.id} row={a} editable={editable} timezone={timezone} onRemove={() => act(() => removeAssignment(a.id))} />
+                <AssignmentSettings key={a.id} row={a} editable={editable} timezone={timezone} onRemove={() => act(() => removeAssignment(a.id), 'Assignment removed')} />
               ))}
             </ul>
           )}
@@ -425,6 +434,7 @@ function AssignmentSettings({
   onRemove: () => void;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [opensAt, setOpensAt] = useState(toLocalInputValue(row.opensAt ? new Date(row.opensAt) : null, timezone));
@@ -450,6 +460,7 @@ function AssignmentSettings({
     const res = await updateAssignmentSettings(row.id, input);
     setBusy(false);
     if (!res.ok) setError(res.error ?? 'Failed.');
+    else toast('Assignment settings saved');
     router.refresh();
   }
 
