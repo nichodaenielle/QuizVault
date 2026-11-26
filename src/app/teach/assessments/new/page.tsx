@@ -21,7 +21,7 @@ export default async function NewAssessmentPage() {
       ]}
     >
       <PageHeader title="New assessment" subtitle="Choose a mode — any mode supports all question types." />
-      <div className="max-w-xl">
+      <div className="mx-auto max-w-xl">
         <AssessmentForm />
       </div>
     </AppShell>

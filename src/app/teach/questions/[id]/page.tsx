@@ -39,7 +39,7 @@ export default async function EditQuestionPage({
         title={q.archived ? 'View question' : 'Edit question'}
         subtitle={`Version ${q.version} · by ${q.owner.name ?? q.owner.email} · edits never change already-published attempts`}
       />
-      <div className="max-w-3xl">
+      <div className="mx-auto max-w-3xl">
         <QuestionForm
           initial={{
             id: q.id,

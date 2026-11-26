@@ -21,7 +21,7 @@ export default async function NewQuestionPage() {
       ]}
     >
       <PageHeader title="New question" subtitle="Add a question to your bank." />
-      <div className="max-w-3xl">
+      <div className="mx-auto max-w-3xl">
         <QuestionForm />
       </div>
     </AppShell>
