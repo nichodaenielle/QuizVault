@@ -69,9 +69,15 @@ export async function saveAssessmentDraft(id: string, spec: DraftSpec): Promise<
   const setIds = spec.items
     .filter((i) => i.kind === 'SET' || i.kind === 'RANDOM')
     .map((i) => (i as { setId: string }).setId);
+  const isAdmin = user.role === 'ADMIN';
+  const ownerFilter = isAdmin ? {} : { ownerId: user.id };
   const [qs, sets] = await Promise.all([
-    qIds.length ? prisma.question.count({ where: { id: { in: qIds } } }) : 0,
-    setIds.length ? prisma.questionSet.count({ where: { id: { in: setIds }, archived: false } }) : 0,
+    qIds.length
+      ? prisma.question.count({ where: { id: { in: qIds }, ...ownerFilter } })
+      : 0,
+    setIds.length
+      ? prisma.questionSet.count({ where: { id: { in: setIds }, archived: false, ...ownerFilter } })
+      : 0,
   ]);
   if (qs !== new Set(qIds).size) return { ok: false, error: 'One or more questions no longer exist.' };
   if (sets !== new Set(setIds).size) return { ok: false, error: 'One or more question sets no longer exist.' };
@@ -118,25 +124,27 @@ async function resolveSnapshot(a: { id: string; title: string; mode: AssessmentM
       if (!q) return { error: `Question ${item.questionId} not found.` } as const;
       if (q.archived) continue;
       pushQuestion(q);
-    } else if (item.kind === 'SET') {
+    } else {
+      const set = await prisma.questionSet.findUnique({ where: { id: item.setId }, select: { archived: true } });
+      if (!set || set.archived) {
+        return { error: 'A question set in this assessment was deleted or archived. Remove it and republish.' } as const;
+      }
       const rows = await prisma.questionSetItem.findMany({
         where: { setId: item.setId, question: { archived: false } },
         orderBy: { order: 'asc' },
         include: { question: true },
       });
-      for (const r of rows) pushQuestion(r.question);
-    } else {
-      const rows = await prisma.questionSetItem.findMany({
-        where: { setId: item.setId, question: { archived: false } },
-        include: { question: true },
-      });
-      const pool = [...rows];
-      // Fisher-Yates shuffle then take `count`.
-      for (let i = pool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [pool[i], pool[j]] = [pool[j], pool[i]];
+      if (item.kind === 'SET') {
+        for (const r of rows) pushQuestion(r.question);
+      } else {
+        const pool = [...rows];
+        // Fisher-Yates shuffle then take `count`.
+        for (let i = pool.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+        for (const r of pool.slice(0, item.count)) pushQuestion(r.question);
       }
-      for (const r of pool.slice(0, item.count)) pushQuestion(r.question);
     }
   }
 
@@ -352,7 +360,7 @@ export async function gradeEssay(
   const user = await requireRole('INSTRUCTOR', 'ADMIN');
   const resp = await prisma.response.findUnique({
     where: { id: responseId },
-    include: { attempt: { include: { assignment: true, assessment: true } } },
+    include: { attempt: { include: { assignment: true, assessment: true, version: true } } },
   });
   if (!resp) return { ok: false, error: 'Response not found.' };
   if (user.role === 'INSTRUCTOR') {
@@ -361,8 +369,17 @@ export async function gradeEssay(
       (await canManageSection(user, resp.attempt.assignment.sectionId));
     if (!allowed) return { ok: false, error: 'Access denied.' };
   }
-  if (!Number.isFinite(input.score) || input.score < 0 || input.score > input.maxScore) {
-    return { ok: false, error: `Score must be between 0 and ${input.maxScore}.` };
+
+  // Only essay responses are manually gradable, and the max score comes from
+  // the snapshot — never trust client-supplied values.
+  const snapItems = (resp.attempt.version?.snapshot as { items?: { key: string; type: string; points: number }[] } | null)?.items ?? [];
+  const snapItem = snapItems.find((i) => i.key === resp.itemKey);
+  if (!snapItem || snapItem.type !== 'ESSAY') {
+    return { ok: false, error: 'Only essay responses can be graded here.' };
+  }
+  const maxScore = resp.maxScore ?? snapItem.points;
+  if (!Number.isFinite(input.score) || input.score < 0 || input.score > maxScore) {
+    return { ok: false, error: `Score must be between 0 and ${maxScore}.` };
   }
 
   await prisma.$transaction(async (tx) => {
@@ -372,21 +389,21 @@ export async function gradeEssay(
         responseId,
         attemptId: resp.attemptId,
         score: input.score,
-        maxScore: input.maxScore,
+        maxScore,
         rubricScores: (input.rubricScores ?? undefined) as Prisma.InputJsonValue | undefined,
         feedback: input.feedback?.trim() || null,
         gradedById: user.id,
       },
       update: {
         score: input.score,
-        maxScore: input.maxScore,
+        maxScore,
         rubricScores: (input.rubricScores ?? undefined) as Prisma.InputJsonValue | undefined,
         feedback: input.feedback?.trim() || null,
         gradedById: user.id,
         gradedAt: new Date(),
       },
     });
-    await tx.response.update({ where: { id: responseId }, data: { score: input.score, maxScore: input.maxScore } });
+    await tx.response.update({ where: { id: responseId }, data: { score: input.score, maxScore } });
   });
   await recomputeAttemptScore(resp.attemptId);
   await audit(user.id, 'ESSAY_GRADED', 'Response', responseId, { score: input.score });

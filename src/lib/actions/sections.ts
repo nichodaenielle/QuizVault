@@ -40,8 +40,14 @@ export async function createSection(formData: FormData): Promise<ActionResult> {
       data: { name, description: description || null, createdById: user.id },
     });
     const ids = user.role === 'INSTRUCTOR' ? [user.id] : instructorIds.length ? instructorIds : [user.id];
+    // Only staff may be section instructors — ignore anything else.
+    const staff = await tx.user.findMany({
+      where: { id: { in: ids }, role: { in: ['INSTRUCTOR', 'ADMIN'] } },
+      select: { id: true },
+    });
+    const staffIds = staff.length ? staff.map((u) => u.id) : [user.id];
     await tx.sectionInstructor.createMany({
-      data: ids.map((uid) => ({ sectionId: s.id, userId: uid, assignedBy: user.id })),
+      data: staffIds.map((uid) => ({ sectionId: s.id, userId: uid, assignedBy: user.id })),
       skipDuplicates: true,
     });
     // Generate the first join code inside the transaction.
@@ -81,10 +87,12 @@ export async function updateCodeStatus(
 ): Promise<ActionResult> {
   const user = await requireRole('INSTRUCTOR', 'ADMIN');
   await requireSectionManager(user, sectionId);
+  const target = await prisma.sectionCode.findUnique({ where: { id: codeId } });
+  if (!target || target.sectionId !== sectionId) {
+    return { ok: false, error: 'Code not found in this section.' };
+  }
   if (status === 'ACTIVE') {
     // Re-activating: disable other active codes for the section.
-    const code = await prisma.sectionCode.findUnique({ where: { id: codeId } });
-    if (!code) return { ok: false, error: 'Code not found.' };
     await prisma.$transaction(async (tx) => {
       await tx.sectionCode.updateMany({
         where: { sectionId, status: 'ACTIVE', id: { not: codeId } },

@@ -7,6 +7,10 @@ import { Prisma } from '@prisma/client';
 
 export const runtime = 'nodejs';
 
+// navigator.sendBeacon always issues POST — alias it to the same handler so
+// the unload-flush path actually persists answers.
+export { PUT as POST };
+
 /**
  * Autosave answers. Accepts either { itemKey, answer } for a single item or
  * { answers: { [itemKey]: answer } } for a batch. Upserts are idempotent.

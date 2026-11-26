@@ -147,11 +147,12 @@ export function Runner({
 
   const doSubmit = useCallback(async () => {
     if (submittedRef.current) return;
-    submittedRef.current = true;
     setSubmitting(true);
     setSubmitError('');
-    // Best-effort final flush.
+    // Best-effort final flush — must run before submittedRef is set, since
+    // flush() refuses to send once the attempt is marked submitted.
     if (dirtyRef.current.size > 0) await flush().catch(() => {});
+    submittedRef.current = true;
     try {
       const res = await fetch(`/api/attempts/${payload.attemptId}/submit`, { method: 'POST' });
       if (!res.ok) throw new Error('submit failed');

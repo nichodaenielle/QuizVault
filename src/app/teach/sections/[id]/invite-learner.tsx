@@ -8,6 +8,7 @@ import { useToast } from '@/components/toast';
 export function InviteLearner({ sectionId, sectionName }: { sectionId: string; sectionName: string }) {
   const [email, setEmail] = useState('');
   const [link, setLink] = useState('');
+  const [linkEmail, setLinkEmail] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
@@ -18,13 +19,15 @@ export function InviteLearner({ sectionId, sectionName }: { sectionId: string; s
     setBusy(true);
     setError('');
     setLink('');
-    const res = await createInvite({ email, sectionId });
+    const target = email.trim();
+    const res = await createInvite({ email: target, sectionId });
     setBusy(false);
     if (!res.ok) {
       setError(res.error ?? 'Failed.');
       return;
     }
     setLink(`${window.location.origin}${res.path}`);
+    setLinkEmail(target);
     setEmail('');
     toast('Invite created — share the link below');
   }
@@ -51,7 +54,7 @@ export function InviteLearner({ sectionId, sectionName }: { sectionId: string; s
       {error && <p role="alert" className="mt-2 text-xs text-red-700">{error}</p>}
       {link && (
         <div className="mt-3 rounded-lg border border-pine-800/20 bg-pine-50 p-3">
-          <p className="mb-1 text-xs font-medium text-pine-900">Invite link ready — send it to {email || 'the invitee'}:</p>
+          <p className="mb-1 text-xs font-medium text-pine-900">Invite link ready — send it to {linkEmail}:</p>
           <div className="flex items-center gap-2">
             <code className="min-w-0 flex-1 truncate text-xs text-ink-900">{link}</code>
             <button

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionUser } from '@/lib/auth';
 import { attemptForUser } from '@/lib/attempts-shared';
+import { finalizeAttempt } from '@/lib/attempts';
 import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
 
@@ -18,6 +19,10 @@ export async function PUT(
   if (!attempt) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   if (attempt.status !== 'IN_PROGRESS') {
     return NextResponse.json({ error: 'Attempt closed.' }, { status: 409 });
+  }
+  if (attempt.deadlineAt && new Date() > attempt.deadlineAt) {
+    await finalizeAttempt(attemptId);
+    return NextResponse.json({ error: 'Time expired.', expired: true }, { status: 410 });
   }
 
   const body = (await req.json().catch(() => null)) as { itemKey?: string; flagged?: boolean } | null;

@@ -157,6 +157,9 @@ export async function duplicateQuestion(id: string): Promise<ActionResult & { id
   const user = await requireRole('INSTRUCTOR', 'ADMIN');
   const q = await prisma.question.findUnique({ where: { id } });
   if (!q) return { ok: false, error: 'Question not found.' };
+  if (user.role === 'INSTRUCTOR' && q.ownerId !== user.id) {
+    return { ok: false, error: 'You can only duplicate your own questions.' };
+  }
   const copy = await prisma.question.create({
     data: {
       ownerId: user.id,

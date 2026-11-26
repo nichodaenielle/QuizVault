@@ -135,7 +135,8 @@ export async function acceptInvite(
   const ROLE_RANK: Record<Role, number> = { LEARNER: 0, INSTRUCTOR: 1, ADMIN: 2 };
   const grantRole = invite.role && ROLE_RANK[invite.role] > ROLE_RANK[user.role] ? invite.role : null;
 
-  await prisma.$transaction(async (tx) => {
+  try {
+    await prisma.$transaction(async (tx) => {
     const data: Prisma.UserUpdateInput = {};
     if (name) data.name = name;
     if (details !== undefined) data.details = details || null;
@@ -156,11 +157,19 @@ export async function acceptInvite(
         update: {},
       });
     }
-    await tx.invite.update({
-      where: { id: invite.id },
+    // Conditional claim: only the first concurrent accept wins.
+    const claimed = await tx.invite.updateMany({
+      where: { id: invite.id, acceptedAt: null },
       data: { acceptedAt: new Date(), acceptedById: user.id },
     });
-  });
+    if (claimed.count === 0) throw new Error('INVITE_ALREADY_USED');
+    });
+  } catch (e) {
+    if (e instanceof Error && e.message === 'INVITE_ALREADY_USED') {
+      return { ok: false, error: 'This invite was already used.' };
+    }
+    throw e;
+  }
 
   await audit(user.id, 'INVITE_ACCEPTED', 'Invite', invite.id, { role: invite.role, sectionId: invite.sectionId });
   revalidatePath('/learn');

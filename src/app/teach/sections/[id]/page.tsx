@@ -43,7 +43,10 @@ export default async function SectionDetailPage({
   const learnerIds = section.enrollments.map((e) => e.userId);
   const progress = await prisma.attempt.groupBy({
     by: ['userId', 'status'],
-    where: { userId: { in: learnerIds } },
+    where: {
+      userId: { in: learnerIds },
+      assignmentId: { in: section.assignments.map((a) => a.id) },
+    },
     _count: true,
   });
   const progMap = new Map<string, { inProgress: number; submitted: number }>();

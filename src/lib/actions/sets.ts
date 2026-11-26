@@ -78,28 +78,31 @@ export async function searchSetCandidates(
   });
 }
 
-export async function addQuestionsToSet(setId: string, questionIds: string[]): Promise<ActionResult> {
+export async function addQuestionsToSet(setId: string, questionIds: string[]): Promise<ActionResult & { added?: number }> {
   const user = await requireRole('INSTRUCTOR', 'ADMIN');
   const set = await ownedSet(setId, user.id, user.role === 'ADMIN');
   if (!set) return { ok: false, error: 'Set not found.' };
   const maxOrder = set.items.reduce((m, i) => Math.max(m, i.order), -1);
   const questions = await prisma.question.findMany({
-    where: { id: { in: questionIds } },
+    where: {
+      id: { in: questionIds },
+      archived: false,
+      ...(user.role === 'INSTRUCTOR' ? { ownerId: user.id } : {}),
+    },
     select: { id: true },
   });
   const existing = new Set(set.items.map((i) => i.questionId));
+  const toAdd = questions.filter((q) => !existing.has(q.id));
   let order = maxOrder;
   await prisma.$transaction(
-    questions
-      .filter((q) => !existing.has(q.id))
-      .map((q) =>
-        prisma.questionSetItem.create({
-          data: { setId, questionId: q.id, order: ++order },
-        }),
-      ),
+    toAdd.map((q) =>
+      prisma.questionSetItem.create({
+        data: { setId, questionId: q.id, order: ++order },
+      }),
+    ),
   );
   revalidatePath(`/teach/sets/${setId}`);
-  return { ok: true };
+  return { ok: true, added: toAdd.length };
 }
 
 export async function removeSetItem(setId: string, questionId: string): Promise<ActionResult> {

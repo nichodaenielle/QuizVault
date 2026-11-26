@@ -89,12 +89,16 @@ export async function GET(req: NextRequest) {
       }
       await audit(u.id, 'USER_CREATED', 'User', u.id, { email }, tx);
     } else if (firstAdmin && email === firstAdmin && u.role === 'LEARNER') {
-      // First-admin bootstrap via configured verified email.
-      await tx.user.update({ where: { id: u.id }, data: { role: 'ADMIN' } });
-      await tx.roleChange.create({
-        data: { userId: u.id, fromRole: 'LEARNER', toRole: 'ADMIN', changedBy: u.id },
-      });
-      u = await tx.user.findUniqueOrThrow({ where: { id: u.id } });
+      // First-admin bootstrap via configured verified email. Only applies
+      // while no admin exists, so a deliberate demotion is never undone.
+      const adminCount = await tx.user.count({ where: { role: 'ADMIN' } });
+      if (adminCount === 0) {
+        await tx.user.update({ where: { id: u.id }, data: { role: 'ADMIN' } });
+        await tx.roleChange.create({
+          data: { userId: u.id, fromRole: 'LEARNER', toRole: 'ADMIN', changedBy: u.id },
+        });
+        u = await tx.user.findUniqueOrThrow({ where: { id: u.id } });
+      }
     }
     return u;
   });

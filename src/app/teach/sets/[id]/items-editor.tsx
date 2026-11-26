@@ -235,11 +235,12 @@ export function AddQuestionPicker({
             disabled={busy || selected.size === 0}
             onClick={async () => {
               setBusy(true);
-              await addQuestionsToSet(setId, [...selected]);
+              const res = await addQuestionsToSet(setId, [...selected]);
+              const added = res.added ?? selected.size;
               setSelected(new Set());
               setQuery('');
               setBusy(false);
-              toast(`${selected.size || 'Selected'} question${selected.size === 1 ? '' : 's'} added`);
+              toast(added ? `${added} question${added === 1 ? '' : 's'} added` : 'No new questions added');
               router.refresh();
             }}
           >

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionUser } from '@/lib/auth';
 import { attemptForUser } from '@/lib/attempts-shared';
-import { autoGrade, answerIsPresent, type AnswerValue, type SnapshotItem } from '@/lib/questions';
+import { autoGrade, answerIsPresent, DEFAULT_RELEASE, type AnswerValue, type FeedbackRelease, type SnapshotItem } from '@/lib/questions';
 
 export const runtime = 'nodejs';
 
@@ -18,6 +18,21 @@ export async function POST(
   const { attemptId } = await params;
   const attempt = await attemptForUser(attemptId, user);
   if (!attempt) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+  // Self-check is only allowed for reviewer-mode attempts, or after a
+  // submitted attempt's feedback release permits showing answers. Without
+  // this, quiz/exam takers could probe the answer key mid-attempt.
+  const release = {
+    ...DEFAULT_RELEASE,
+    ...((attempt.assignment.feedbackRelease as Partial<FeedbackRelease> | null) ?? {}),
+  };
+  const releaseTimeOk = !release.releaseAt || Date.now() >= new Date(release.releaseAt).getTime();
+  const allowed =
+    attempt.assessment.mode === 'REVIEWER' ||
+    (attempt.status === 'SUBMITTED' && releaseTimeOk && release.showCorrectAnswers);
+  if (!allowed) {
+    return NextResponse.json({ error: 'Self-check is not available for this attempt.' }, { status: 403 });
+  }
 
   const body = (await req.json().catch(() => null)) as { itemKey?: string; answer?: AnswerValue } | null;
   if (!body?.itemKey) return NextResponse.json({ error: 'itemKey required' }, { status: 400 });
