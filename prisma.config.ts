@@ -1,4 +1,4 @@
-import { defineConfig, env } from 'prisma/config';
+import { defineConfig } from 'prisma/config';
 
 try {
   process.loadEnvFile('.env');
@@ -13,6 +13,12 @@ export default defineConfig({
     seed: 'node prisma/seed.mjs',
   },
   datasource: {
-    url: env('DATABASE_URL'),
+    // Local dev uses DATABASE_URL; Vercel/Neon integrations inject POSTGRES_*.
+    url:
+      process.env.DATABASE_URL ??
+      process.env.POSTGRES_PRISMA_URL ??
+      process.env.POSTGRES_URL ??
+      process.env.POSTGRES_URL_NON_POOLING ??
+      '',
   },
 });
