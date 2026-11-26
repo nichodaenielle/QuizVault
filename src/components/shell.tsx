@@ -32,13 +32,13 @@ export function AppShell({
           </Link>
           <nav
             aria-label="Main"
-            className="ml-1 hidden min-w-0 flex-1 gap-0.5 overflow-x-auto lg:flex [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="ml-1 hidden min-w-0 flex-1 gap-0.5 overflow-x-auto px-1 xl:flex [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {nav.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm text-ivory-50/85 hover:bg-pine-800 hover:text-ivory-50"
+                className="whitespace-nowrap rounded-lg px-2.5 py-1.5 text-sm text-ivory-50/85 hover:bg-pine-800 hover:text-ivory-50"
               >
                 {item.label}
               </Link>
@@ -64,7 +64,7 @@ export function AppShell({
         </div>
         <nav
           aria-label="Main mobile"
-          className="flex gap-1 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:hidden"
+          className="flex gap-1 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden xl:hidden"
         >
           {nav.map((item) => (
             <Link
