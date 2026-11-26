@@ -40,6 +40,7 @@ export default async function QuestionsPage({
       where,
       orderBy: { createdAt: 'desc' },
       take: 200,
+      include: { owner: { select: { name: true, email: true } } },
     }),
     prisma.question.findMany({
       where: user.role === 'INSTRUCTOR' ? { ownerId: user.id } : {},
@@ -72,7 +73,7 @@ export default async function QuestionsPage({
       {questions.length === 0 ? (
         <EmptyState title="No questions found" body="Adjust filters or create a question." />
       ) : (
-        <Table head={['Prompt', 'Type', 'Subject / Topic', 'Difficulty', 'Pts', 'Status', 'Actions']}>
+        <Table head={['Prompt', 'Type', 'Subject / Topic', 'Difficulty', 'Pts', 'Author', 'Status', 'Actions']}>
           {questions.map((q) => (
             <tr key={q.id} className={q.archived ? 'opacity-60' : ''}>
               <td className="max-w-md px-4 py-3">
@@ -82,6 +83,7 @@ export default async function QuestionsPage({
               <td className="px-4 py-3 text-ink-600">{q.subject} · {q.topic}</td>
               <td className="px-4 py-3 text-ink-600">{q.difficulty}</td>
               <td className="px-4 py-3 text-ink-600">{q.points}</td>
+              <td className="px-4 py-3 text-ink-600">{q.owner.name ?? q.owner.email}</td>
               <td className="px-4 py-3">
                 {q.archived ? <Badge tone="red">Archived</Badge> : <Badge tone="green">Active</Badge>}
               </td>

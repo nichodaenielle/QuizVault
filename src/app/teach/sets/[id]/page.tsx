@@ -21,6 +21,7 @@ export default async function SetDetailPage({
     where: { id },
     include: {
       items: { orderBy: { order: 'asc' }, include: { question: true } },
+      owner: { select: { name: true, email: true } },
     },
   });
   if (!set) notFound();
@@ -52,7 +53,11 @@ export default async function SetDetailPage({
         { href: '/teach/grading', label: 'Grading' },
       ]}
     >
-      <PageHeader title={set.title} subtitle={set.description ?? `${set.items.length} questions`} actions={<Link href="/teach/sets" className="text-sm text-pine-900 hover:underline">← All sets</Link>} />
+      <PageHeader
+        title={set.title}
+        subtitle={`${set.description ? `${set.description} · ` : ''}by ${set.owner.name ?? set.owner.email} · ${set.items.length} questions`}
+        actions={<Link href="/teach/sets" className="text-sm text-pine-900 hover:underline">← All sets</Link>}
+      />
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Card className="p-5">

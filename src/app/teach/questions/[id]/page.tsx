@@ -15,7 +15,10 @@ export default async function EditQuestionPage({
 }) {
   const user = await requireRole('INSTRUCTOR', 'ADMIN');
   const { id } = await params;
-  const q = await prisma.question.findUnique({ where: { id } });
+  const q = await prisma.question.findUnique({
+    where: { id },
+    include: { owner: { select: { name: true, email: true } } },
+  });
   if (!q) notFound();
   if (user.role === 'INSTRUCTOR' && q.ownerId !== user.id) notFound();
 
@@ -34,7 +37,7 @@ export default async function EditQuestionPage({
     >
       <PageHeader
         title={q.archived ? 'View question' : 'Edit question'}
-        subtitle={`Version ${q.version} · edits never change already-published attempts`}
+        subtitle={`Version ${q.version} · by ${q.owner.name ?? q.owner.email} · edits never change already-published attempts`}
       />
       <div className="max-w-3xl">
         <QuestionForm

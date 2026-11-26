@@ -15,7 +15,10 @@ export default async function SetsPage() {
       ...(user.role === 'INSTRUCTOR' ? { ownerId: user.id } : {}),
       archived: false,
     },
-    include: { _count: { select: { items: true } } },
+    include: {
+      _count: { select: { items: true } },
+      owner: { select: { name: true, email: true } },
+    },
     orderBy: { updatedAt: 'desc' },
   });
 
@@ -38,7 +41,7 @@ export default async function SetsPage() {
           {sets.length === 0 ? (
             <EmptyState title="No sets yet" body="Create a set, then add questions to it." />
           ) : (
-            <Table head={['Title', 'Questions', 'Updated', 'Actions']}>
+            <Table head={['Title', 'Questions', 'Author', 'Updated', 'Actions']}>
               {sets.map((s) => (
                 <tr key={s.id}>
                   <td className="px-4 py-3">
@@ -48,6 +51,7 @@ export default async function SetsPage() {
                     {s.description && <p className="text-xs text-ink-600">{s.description}</p>}
                   </td>
                   <td className="px-4 py-3"><Badge tone="neutral">{s._count.items}</Badge></td>
+                  <td className="px-4 py-3 text-ink-600">{s.owner.name ?? s.owner.email}</td>
                   <td className="px-4 py-3 text-ink-600">{s.updatedAt.toLocaleDateString()}</td>
                   <td className="px-4 py-3"><SetRowActions id={s.id} /></td>
                 </tr>
