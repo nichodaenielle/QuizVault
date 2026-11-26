@@ -54,6 +54,7 @@ export default async function GradeResponsePage({
         { href: '/teach/questions', label: 'Question bank' },
         { href: '/teach/sets', label: 'Question sets' },
         { href: '/teach/assessments', label: 'Assessments' },
+        { href: '/teach/invites', label: 'Invites' },
         { href: '/teach/grading', label: 'Grading' },
       ]}
     >
