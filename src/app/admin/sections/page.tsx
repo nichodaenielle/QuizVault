@@ -26,6 +26,7 @@ export default async function AdminSectionsPage() {
         { href: '/admin/users', label: 'Users & roles' },
         { href: '/admin/sections', label: 'Sections' },
         { href: '/admin/invites', label: 'Invites' },
+        { href: '/admin/activity', label: 'Activity' },
       ]}
     >
       <PageHeader title="Sections" subtitle="All sections across the platform." />

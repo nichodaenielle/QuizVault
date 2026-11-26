@@ -50,6 +50,7 @@ export default async function AdminPage() {
         { href: '/admin/users', label: 'Users & roles' },
         { href: '/admin/sections', label: 'Sections' },
         { href: '/admin/invites', label: 'Invites' },
+        { href: '/admin/activity', label: 'Activity' },
       ]}
     >
       <PageHeader title="Admin overview" subtitle="Platform-wide records and access." />
