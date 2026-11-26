@@ -51,6 +51,7 @@ export function QuestionForm({ initial }: Props) {
     options?: { id: string; text: string }[];
     correctId?: string;
     correctIds?: string[];
+    partialCredit?: boolean;
     answers?: string[];
     caseSensitive?: boolean;
     wordLimit?: number;
@@ -67,6 +68,7 @@ export function QuestionForm({ initial }: Props) {
   );
   const [mcCorrectId, setMcCorrectId] = useState<string>(p.correctId ?? '');
   const [msCorrectIds, setMsCorrectIds] = useState<string[]>(p.correctIds ?? []);
+  const [msPartial, setMsPartial] = useState(p.partialCredit === true);
   const [answersText, setAnswersText] = useState<string>((p.answers ?? []).join('\n'));
   const [caseSensitive, setCaseSensitive] = useState(p.caseSensitive === true);
   const [wordLimit, setWordLimit] = useState<number | ''>(p.wordLimit ?? '');
@@ -79,7 +81,7 @@ export function QuestionForm({ initial }: Props) {
       case 'MULTIPLE_CHOICE':
         return { options, correctId: mcCorrectId, hint: hint || undefined };
       case 'MULTIPLE_SELECT':
-        return { options, correctIds: msCorrectIds, hint: hint || undefined };
+        return { options, correctIds: msCorrectIds, partialCredit: msPartial || undefined, hint: hint || undefined };
       case 'SHORT_ANSWER':
       case 'IDENTIFICATION':
         return {
@@ -234,6 +236,17 @@ export function QuestionForm({ initial }: Props) {
             >
               + Add option
             </Button>
+            {type === 'MULTIPLE_SELECT' && (
+              <label className="flex items-start gap-2 pt-1 text-sm text-ink-900">
+                <input type="checkbox" className="mt-1" checked={msPartial} onChange={(e) => setMsPartial(e.target.checked)} />
+                <span>
+                  Partial credit
+                  <span className="block text-xs text-ink-600">
+                    Off: any wrong or missing pick scores 0. On: +1 per correct pick, −1 per wrong pick, scaled to points.
+                  </span>
+                </span>
+              </label>
+            )}
           </div>
         )}
 

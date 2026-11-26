@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/auth';
 import { AppShell } from '@/components/shell';
-import { Badge, Card, EmptyState, PageHeader } from '@/components/ui';
+import { Badge, Card, EmptyState, LinkButton, PageHeader } from '@/components/ui';
 import { formatDateTime } from '@/lib/time';
 import { orderItems } from '@/lib/attempts';
 import { DEFAULT_RELEASE, type AnswerValue, type FeedbackRelease, type Snapshot, type SnapshotItem } from '@/lib/questions';
@@ -108,7 +108,11 @@ export default async function ResultPage({
             <Link href={`/learn/attempts/${attempt.id}`} className="rounded-lg bg-pine-900 px-4 py-2 text-sm font-medium text-ivory-50">
               Resume attempt
             </Link>
-          ) : undefined
+          ) : (
+            <LinkButton href="/learn" variant="secondary">
+              Back to dashboard
+            </LinkButton>
+          )
         }
       />
 

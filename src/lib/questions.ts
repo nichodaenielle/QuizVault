@@ -16,7 +16,7 @@ export interface RubricCriterion {
 export type QuestionPayload =
   | { correct: boolean; hint?: string } // TRUE_FALSE
   | { options: McOption[]; correctId: string; hint?: string } // MULTIPLE_CHOICE
-  | { options: McOption[]; correctIds: string[]; hint?: string } // MULTIPLE_SELECT
+  | { options: McOption[]; correctIds: string[]; partialCredit?: boolean; hint?: string } // MULTIPLE_SELECT
   | { answers: string[]; caseSensitive: boolean; hint?: string } // SHORT_ANSWER
   | { answers: string[]; caseSensitive: boolean; hint?: string } // IDENTIFICATION
   | { wordLimit?: number; rubric?: RubricCriterion[]; hint?: string }; // ESSAY
@@ -97,13 +97,21 @@ export function autoGrade(
       return answer === p.correctId ? points : 0;
     }
     case 'MULTIPLE_SELECT': {
-      const p = payload as { correctIds: string[] };
+      const p = payload as { correctIds: string[]; partialCredit?: boolean };
       if (!Array.isArray(answer)) return 0;
       const a = new Set(answer);
       const c = new Set(p.correctIds);
-      if (a.size !== c.size) return 0;
-      for (const v of c) if (!a.has(v)) return 0;
-      return points;
+      if (a.size === c.size && [...c].every((v) => a.has(v))) return points;
+      if (!p.partialCredit || c.size === 0) return 0;
+      // Partial credit: +1 per correct pick, −1 per wrong pick, scaled to points.
+      let tp = 0;
+      let fp = 0;
+      for (const v of a) {
+        if (c.has(v)) tp++;
+        else fp++;
+      }
+      const earned = Math.max(0, tp - fp) / c.size;
+      return Math.round(points * earned * 100) / 100;
     }
     case 'SHORT_ANSWER':
     case 'IDENTIFICATION': {
