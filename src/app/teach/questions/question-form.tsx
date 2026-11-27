@@ -203,7 +203,7 @@ export function QuestionForm({ initial }: Props) {
                 const isCorrect =
                   type === 'MULTIPLE_CHOICE' ? mcCorrectId === o.id : msCorrectIds.includes(o.id);
                 return (
-                  <li key={o.id} className="flex items-center gap-2">
+                  <li key={o.id} className="flex flex-wrap items-center gap-2">
                     <input
                       type={type === 'MULTIPLE_CHOICE' ? 'radio' : 'checkbox'}
                       name="correct-opt"
@@ -223,7 +223,7 @@ export function QuestionForm({ initial }: Props) {
                         setOptions((opts) => opts.map((x) => (x.id === o.id ? { ...x, text: e.target.value } : x)))
                       }
                       placeholder={`Option ${i + 1}`}
-                      className="flex-1"
+                      className="min-w-0 flex-1"
                     />
                     <button
                       type="button"
@@ -332,7 +332,7 @@ export function QuestionForm({ initial }: Props) {
             </div>
             <ol className="space-y-2">
               {orderItems.map((o, i) => (
-                <li key={o.id} className="flex items-center gap-2 rounded-lg border border-ink-400/20 p-2">
+                <li key={o.id} className="flex flex-wrap items-center gap-2 rounded-lg border border-ink-400/20 p-2">
                   <span className="w-6 shrink-0 text-center text-sm font-semibold text-ink-400">{i + 1}.</span>
                   <input
                     value={o.text}
@@ -340,7 +340,7 @@ export function QuestionForm({ initial }: Props) {
                       setOrderItems((items) => items.map((x) => (x.id === o.id ? { ...x, text: e.target.value } : x)))
                     }
                     placeholder={`Item ${i + 1}`}
-                    className="flex-1"
+                    className="min-w-0 flex-1 basis-32"
                   />
                   <button
                     type="button"

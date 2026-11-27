@@ -92,8 +92,8 @@ export default async function AdminActivityPage({
       {logs.length === 0 ? (
         <EmptyState title="No activity found" body="Try widening the filters or date range." />
       ) : (
-        <Card className="overflow-hidden">
-          <table className="w-full text-sm">
+        <Card className="overflow-x-auto">
+          <table className="w-full min-w-[720px] text-sm">
             <thead>
               <tr className="border-b border-ink-400/15 text-left text-xs uppercase tracking-wide text-ink-600">
                 <th className="px-4 py-3 font-medium">Time</th>

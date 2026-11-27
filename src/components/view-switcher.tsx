@@ -18,7 +18,7 @@ export function ViewSwitcher({ role }: { role: string }) {
   return (
     <Link
       href={target}
-      className="shrink-0 rounded-lg border border-gold-100/60 bg-gold-100/10 px-3 py-1.5 text-sm font-medium text-gold-100 hover:bg-gold-100/20"
+      className="shrink-0 rounded-lg border border-gold-100/60 bg-gold-100/10 px-2.5 py-1 text-xs font-medium text-gold-100 hover:bg-gold-100/20 sm:px-3 sm:py-1.5 sm:text-sm"
     >
       {target === '/admin' ? 'Admin view' : 'Instructor view'}
     </Link>
