@@ -5,10 +5,10 @@ import { DevLogin } from './dev-login';
 export const dynamic = 'force-dynamic';
 
 const FEATURES = [
-  'Join sections with a class code',
-  'Six question types, auto-graded',
+  'Request to join a section with a class code',
+  'Six question types, including essays',
   'Timed quizzes and exams',
-  'Instant progress and released results',
+  'Track your progress and view released results',
 ];
 
 export default async function SignInPage({
@@ -26,7 +26,7 @@ export default async function SignInPage({
   return (
     <main className="flex min-h-screen bg-ivory-50">
       {/* Brand panel */}
-      <section className="relative hidden w-[45%] max-w-xl flex-col justify-between overflow-hidden bg-gradient-to-br from-pine-950 via-pine-900 to-pine-800 p-10 text-ivory-50 lg:flex">
+      <section className="relative hidden w-[36%] max-w-xl flex-col justify-between overflow-hidden bg-gradient-to-br from-pine-950 via-pine-900 to-pine-800 p-12 text-ivory-50 lg:flex">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-gold-500/10 blur-3xl"
@@ -42,7 +42,7 @@ export default async function SignInPage({
           <img
             src="/bg/quizvault-vault-background.svg"
             alt=""
-            className="w-full opacity-30 [mask-image:linear-gradient(to_bottom,transparent,black_45%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent,black_45%)]"
+            className="w-full opacity-40 [mask-image:linear-gradient(to_bottom,transparent,black_45%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent,black_45%)]"
           />
         </div>
 
@@ -61,9 +61,7 @@ export default async function SignInPage({
             Practice makes permanent.
           </p>
           <h1 className="text-4xl font-semibold leading-tight tracking-tight">
-            Reviewers, quizzes, and exams —
-            <br />
-            all in one vault.
+            Reviewers, quizzes, and exams — all in one vault.
           </h1>
           <ul className="mt-8 space-y-3">
             {FEATURES.map((f) => (
@@ -88,8 +86,8 @@ export default async function SignInPage({
       </section>
 
       {/* Sign-in panel */}
-      <section className="flex flex-1 items-center justify-center px-4 py-10">
-        <div className="w-full max-w-md">
+      <section className="flex flex-1 flex-col px-4 py-10 sm:px-6">
+        <div className="m-auto w-full max-w-[450px]">
           {/* Compact brand for small screens */}
           <div className="mb-8 flex items-center gap-3 lg:hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -104,10 +102,10 @@ export default async function SignInPage({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-ink-400/15 bg-ivory-100 p-8 shadow-xl shadow-pine-950/10">
-            <h2 className="text-xl font-semibold tracking-tight text-ink-900">Sign in</h2>
+          <div className="rounded-2xl border border-ink-400/15 bg-ivory-100 p-8 shadow-lg shadow-pine-950/5">
+            <h2 className="text-[27px] font-semibold leading-snug tracking-tight text-ink-900">Sign in to QuizVault</h2>
             <p className="mt-1 text-sm text-ink-600">
-              Use your Google account to continue.
+              Use your Google account to access QuizVault.
             </p>
 
             {error && (
@@ -123,7 +121,7 @@ export default async function SignInPage({
               {oauthConfigured ? (
                 <a
                   href="/api/auth/google"
-                  className="flex w-full items-center justify-center gap-3 rounded-lg bg-pine-900 px-4 py-3 text-sm font-medium text-ivory-50 shadow-sm transition-colors hover:bg-pine-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pine-800"
+                  className="flex min-h-12 w-full items-center justify-center gap-3 rounded-lg bg-pine-900 px-4 py-3 text-sm font-medium text-ivory-50 shadow-sm transition-colors hover:bg-pine-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pine-800"
                 >
                   <GoogleIcon />
                   Continue with Google
@@ -138,14 +136,16 @@ export default async function SignInPage({
               {devAuth && <DevLogin />}
             </div>
 
+            <p className="mt-4 text-center text-xs leading-relaxed text-ink-600">
+              Have a class code? Enter it after signing in to request access to your section.
+            </p>
+
             <p className="mt-6 text-center text-xs leading-relaxed text-ink-600">
               By signing in you agree to use QuizVault for your courses.
-              <br />
-              Learners join sections with a class code after signing in.
             </p>
           </div>
 
-          <p className="mt-6 text-center text-xs text-ink-400">
+          <p className="mt-6 text-center text-xs text-ink-600">
             Trouble signing in? Contact your instructor or administrator.
           </p>
         </div>
