@@ -1,4 +1,34 @@
 import type { ReactNode } from 'react';
+import type { Role } from '@prisma/client';
+import type { NavItem } from '@/components/shell';
+
+/** Navbar for manual pages — follows the viewer's role, not the guide's. */
+export function manualNav(role: Role): NavItem[] {
+  if (role === 'ADMIN') {
+    return [
+      { href: '/admin', label: 'Dashboard' },
+      { href: '/admin/users', label: 'Users & roles' },
+      { href: '/admin/sections', label: 'Sections' },
+      { href: '/admin/invites', label: 'Invites' },
+      { href: '/admin/activity', label: 'Activity' },
+    ];
+  }
+  if (role === 'INSTRUCTOR') {
+    return [
+      { href: '/teach', label: 'Dashboard' },
+      { href: '/teach/sections', label: 'Sections' },
+      { href: '/teach/questions', label: 'Question bank' },
+      { href: '/teach/sets', label: 'Question sets' },
+      { href: '/teach/assessments', label: 'Assessments' },
+      { href: '/teach/grading', label: 'Grading' },
+      { href: '/teach/invites', label: 'Invites' },
+    ];
+  }
+  return [
+    { href: '/learn', label: 'Dashboard' },
+    { href: '/learn/join', label: 'Join section' },
+  ];
+}
 
 /** Numbered section wrapper for manual pages. */
 export function ManualSection({

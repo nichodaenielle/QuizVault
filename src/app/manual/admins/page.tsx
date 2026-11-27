@@ -1,23 +1,14 @@
 import { requireRole } from '@/lib/auth';
 import { AppShell } from '@/components/shell';
 import { PageHeader } from '@/components/ui';
-import { Flow, ManualSection, Shot, Tip } from '@/components/manual';
+import { Flow, ManualSection, Shot, Tip, manualNav } from '@/components/manual';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminManual() {
   const user = await requireRole('ADMIN');
   return (
-    <AppShell
-      user={user}
-      nav={[
-        { href: '/admin', label: 'Dashboard' },
-        { href: '/admin/users', label: 'Users & roles' },
-        { href: '/admin/sections', label: 'Sections' },
-        { href: '/admin/invites', label: 'Invites' },
-        { href: '/admin/activity', label: 'Activity' },
-      ]}
-    >
+    <AppShell user={user} nav={manualNav(user.role)}>
       <PageHeader
         title="Admin guide"
         subtitle="Admins are also instructors — everything in the instructor guide applies. This page covers the admin-only tools."

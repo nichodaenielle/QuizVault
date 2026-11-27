@@ -1,14 +1,14 @@
 import { requireRole } from '@/lib/auth';
 import { AppShell } from '@/components/shell';
 import { PageHeader } from '@/components/ui';
-import { Flow, ManualSection, Shot, Tip } from '@/components/manual';
+import { Flow, ManualSection, Shot, Tip, manualNav } from '@/components/manual';
 
 export const dynamic = 'force-dynamic';
 
 export default async function LearnerManual() {
   const user = await requireRole('LEARNER', 'INSTRUCTOR', 'ADMIN');
   return (
-    <AppShell user={user} nav={[{ href: '/learn', label: 'Dashboard' }]}>
+    <AppShell user={user} nav={manualNav(user.role)}>
       <PageHeader title="Learner guide" subtitle="Everything you need to join sections and complete assessments." />
 
       <ManualSection id="sign-in" title="1. Signing in">

@@ -1,25 +1,14 @@
 import { requireRole } from '@/lib/auth';
 import { AppShell } from '@/components/shell';
 import { PageHeader } from '@/components/ui';
-import { Flow, ManualSection, Shot, Tip } from '@/components/manual';
+import { Flow, ManualSection, Shot, Tip, manualNav } from '@/components/manual';
 
 export const dynamic = 'force-dynamic';
 
 export default async function InstructorManual() {
   const user = await requireRole('INSTRUCTOR', 'ADMIN');
   return (
-    <AppShell
-      user={user}
-      nav={[
-        { href: '/teach', label: 'Dashboard' },
-        { href: '/teach/sections', label: 'Sections' },
-        { href: '/teach/questions', label: 'Question bank' },
-        { href: '/teach/sets', label: 'Question sets' },
-        { href: '/teach/assessments', label: 'Assessments' },
-        { href: '/teach/grading', label: 'Grading' },
-        { href: '/teach/invites', label: 'Invites' },
-      ]}
-    >
+    <AppShell user={user} nav={manualNav(user.role)}>
       <PageHeader title="Instructor guide" subtitle="Build assessments, run sections, and grade essays." />
 
       <ManualSection id="dashboard" title="1. Teaching dashboard">

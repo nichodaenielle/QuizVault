@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
 import { AppShell } from '@/components/shell';
 import { PageHeader } from '@/components/ui';
+import { manualNav } from '@/components/manual';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +29,7 @@ export default async function ManualPage() {
   return (
     <AppShell
       user={user}
-      nav={[{ href: user.role === 'LEARNER' ? '/learn' : user.role === 'INSTRUCTOR' ? '/teach' : '/admin', label: 'Dashboard' }]}
+      nav={manualNav(user.role)}
     >
       <PageHeader title="QuizVault user manual" subtitle="Task guides for every role, with screenshots of the real app." />
       <div className="grid gap-4 sm:grid-cols-3">
