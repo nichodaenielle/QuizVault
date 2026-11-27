@@ -17,6 +17,7 @@ export function AppShell({
   nav: NavItem[];
   children: ReactNode;
 }) {
+  const items = [...nav, { href: '/manual', label: 'Manual' }];
   return (
     <div className="min-h-screen bg-ivory-50">
       <header className="sticky top-0 z-40 bg-pine-900 bg-[url('/bg/quizvault-navbar-background.svg')] bg-cover bg-center bg-no-repeat text-ivory-50 shadow-md">
@@ -34,7 +35,7 @@ export function AppShell({
             aria-label="Main"
             className="ml-1 hidden min-w-0 flex-1 gap-0.5 overflow-x-auto px-1 xl:flex [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
-            {nav.map((item) => (
+            {items.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -66,7 +67,7 @@ export function AppShell({
           aria-label="Main mobile"
           className="flex gap-1 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden xl:hidden"
         >
-          {nav.map((item) => (
+          {items.map((item) => (
             <Link
               key={item.href}
               href={item.href}

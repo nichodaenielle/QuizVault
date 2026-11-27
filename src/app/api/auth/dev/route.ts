@@ -24,11 +24,17 @@ export async function POST(req: NextRequest) {
   const role = firstAdmin && email === firstAdmin ? 'ADMIN' : requestedRole;
 
   const googleSub = `dev:${email}`;
-  const user = await prisma.user.upsert({
-    where: { googleSub },
-    update: { email, name: body.name ?? undefined },
-    create: { googleSub, email, name: body.name ?? 'Dev User', role },
+  const existing = await prisma.user.findFirst({
+    where: { OR: [{ email }, { googleSub }] },
   });
+  const user = existing
+    ? await prisma.user.update({
+        where: { id: existing.id },
+        data: { email, name: body.name ?? undefined },
+      })
+    : await prisma.user.create({
+        data: { googleSub, email, name: body.name ?? 'Dev User', role },
+      });
   const token = await createSessionToken(user.id);
   const res = NextResponse.json({ ok: true, redirect: homePathFor(user.role) });
   res.cookies.set(SESSION_COOKIE, token, {
