@@ -49,6 +49,38 @@ export async function setSetArchived(id: string, archived: boolean): Promise<Act
   return { ok: true };
 }
 
+/** Permanently delete a set. Blocked while referenced by a live assessment draft. */
+export async function deleteSet(id: string): Promise<ActionResult> {
+  const user = await requireRole('INSTRUCTOR', 'ADMIN');
+  const set = await ownedSet(id, user.id, user.role === 'ADMIN');
+  if (!set) return { ok: false, error: 'Set not found.' };
+
+  const drafts = await prisma.assessment.findMany({
+    where: {
+      status: { not: 'ARCHIVED' },
+      ...(user.role === 'INSTRUCTOR' ? { ownerId: user.id } : {}),
+    },
+    select: { id: true, title: true, draft: true },
+  });
+  const refs = drafts.filter((a) => {
+    const items =
+      (a.draft as { items?: { kind?: string; setId?: string }[] } | null)?.items ?? [];
+    return items.some((i) => (i.kind === 'SET' || i.kind === 'RANDOM') && i.setId === id);
+  });
+  if (refs.length > 0) {
+    const names = refs.slice(0, 3).map((r) => `"${r.title}"`).join(', ');
+    return {
+      ok: false,
+      error: `This set is used in ${refs.length} assessment draft${refs.length === 1 ? '' : 's'} (${names}${refs.length > 3 ? ', …' : ''}). Remove it there first.`,
+    };
+  }
+
+  await prisma.questionSet.delete({ where: { id } });
+  await audit(user.id, 'SET_DELETED', 'QuestionSet', id, { title: set.title });
+  revalidatePath('/teach/sets');
+  return { ok: true };
+}
+
 /** Search bank questions that can still be added to a set. */
 export async function searchSetCandidates(
   setId: string,
