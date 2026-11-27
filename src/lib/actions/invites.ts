@@ -4,7 +4,7 @@ import { randomBytes } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { getSessionUser, homePathFor, requireRole } from '@/lib/auth';
-import { audit, canManageSection } from '@/lib/access';
+import { audit, canInviteAdmins, canManageSection } from '@/lib/access';
 import type { ActionResult } from './sections';
 import type { Prisma, Role } from '@prisma/client';
 
@@ -29,8 +29,11 @@ export async function createInvite(
   let role: Role | null = null;
   if (input.role) {
     if (user.role !== 'ADMIN') return { ok: false, error: 'Only admins can invite with a role.' };
-    if (input.role !== 'LEARNER' && input.role !== 'INSTRUCTOR') {
-      return { ok: false, error: 'Invites can only grant Learner or Instructor roles.' };
+    if (input.role === 'ADMIN' && !canInviteAdmins(user)) {
+      return { ok: false, error: 'Your account is not allowed to invite admins.' };
+    }
+    if (input.role !== 'LEARNER' && input.role !== 'INSTRUCTOR' && input.role !== 'ADMIN') {
+      return { ok: false, error: 'Invalid invite role.' };
     }
     role = input.role;
   }

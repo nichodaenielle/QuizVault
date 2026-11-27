@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/auth';
-import { instructorSectionIds } from '@/lib/access';
+import { instructorSectionIds, canInviteAdmins } from '@/lib/access';
 import { AppShell } from '@/components/shell';
 import { PageHeader } from '@/components/ui';
 import { listInvites } from '@/lib/actions/invites';
@@ -43,7 +43,7 @@ export default async function TeachInvitesPage() {
             : 'Invite learners into your sections by email link.'
         }
       />
-      <InviteManager initialInvites={invites} isAdmin={isAdmin} sections={sections} />
+      <InviteManager initialInvites={invites} isAdmin={isAdmin} canInviteAdmin={canInviteAdmins(user)} sections={sections} />
     </AppShell>
   );
 }

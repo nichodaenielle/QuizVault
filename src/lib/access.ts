@@ -77,3 +77,19 @@ export async function listInstructors() {
 export function hasRole(user: { role: Role }, ...roles: Role[]) {
   return roles.includes(user.role);
 }
+
+/**
+ * Emails allowed to create invites that grant the ADMIN role.
+ * Configured via ADMIN_INVITE_EMAILS (comma-separated). Invites can never
+ * grant admin unless the inviter is an admin AND listed here.
+ */
+export function adminInviteEmails(): string[] {
+  return (process.env.ADMIN_INVITE_EMAILS ?? '')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+export function canInviteAdmins(user: { role: Role; email: string }) {
+  return user.role === 'ADMIN' && adminInviteEmails().includes(user.email.toLowerCase());
+}

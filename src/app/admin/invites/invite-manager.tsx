@@ -28,10 +28,12 @@ const STATUS_TONE: Record<string, 'green' | 'gold' | 'neutral'> = {
 export function InviteManager({
   initialInvites,
   isAdmin,
+  canInviteAdmin = false,
   sections,
 }: {
   initialInvites: InviteRow[];
   isAdmin: boolean;
+  canInviteAdmin?: boolean;
   sections: { id: string; name: string }[];
 }) {
   const router = useRouter();
@@ -88,6 +90,7 @@ export function InviteManager({
               <option value="">No role change</option>
               <option value="LEARNER">Learner (student)</option>
               <option value="INSTRUCTOR">Instructor</option>
+              {canInviteAdmin && <option value="ADMIN">Admin</option>}
             </select>
           </Field>
         )}

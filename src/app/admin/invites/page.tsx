@@ -3,6 +3,7 @@ import { requireRole } from '@/lib/auth';
 import { AppShell } from '@/components/shell';
 import { PageHeader } from '@/components/ui';
 import { listInvites } from '@/lib/actions/invites';
+import { canInviteAdmins } from '@/lib/access';
 import { InviteManager } from './invite-manager';
 
 export const dynamic = 'force-dynamic';
@@ -29,7 +30,7 @@ export default async function AdminInvitesPage() {
         title="Invites"
         subtitle="Email invite links that grant a role, enroll in a section, or both on acceptance."
       />
-      <InviteManager initialInvites={invites} isAdmin sections={sections} />
+      <InviteManager initialInvites={invites} isAdmin canInviteAdmin={canInviteAdmins(user)} sections={sections} />
     </AppShell>
   );
 }
