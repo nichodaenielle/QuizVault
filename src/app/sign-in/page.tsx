@@ -35,6 +35,16 @@ export default async function SignInPage({
           aria-hidden
           className="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-pine-700/40 blur-3xl"
         />
+        {/* Decorative vault dial — clipped by the panel's overflow-hidden,
+            edges faded into the gradient via mask. Hidden on mobile with the panel. */}
+        <div aria-hidden className="pointer-events-none absolute -bottom-[12%] -right-[45%] w-[150%]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/bg/quizvault-vault-background.svg"
+            alt=""
+            className="w-full opacity-30 [mask-image:linear-gradient(to_bottom,transparent,black_45%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent,black_45%)]"
+          />
+        </div>
 
         <div className="relative flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
