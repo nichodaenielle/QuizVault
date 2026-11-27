@@ -5,6 +5,7 @@ import { AppShell } from '@/components/shell';
 import { Badge, Card, EmptyState, PageHeader, Table } from '@/components/ui';
 import { CreateSetForm } from './new/form';
 import { SetRowActions } from './row-actions';
+import { formatDateTime } from '@/lib/time';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,7 +78,7 @@ export default async function SetsPage({
                   </td>
                   <td className="px-4 py-3"><Badge tone="neutral">{s._count.items}</Badge></td>
                   <td className="px-4 py-3 text-ink-600">{s.owner.name ?? s.owner.email}</td>
-                  <td className="px-4 py-3 text-ink-600">{s.updatedAt.toLocaleDateString()}</td>
+                  <td className="px-4 py-3 text-ink-600">{formatDateTime(s.updatedAt, user.timezone)}</td>
                   <td className="px-4 py-3">
                     <span className="flex items-center gap-2">
                       {s.archived && <Badge tone="gold">Archived</Badge>}

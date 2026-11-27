@@ -29,6 +29,7 @@ export async function updateSet(id: string, input: { title: string; description?
   const user = await requireRole('INSTRUCTOR', 'ADMIN');
   const set = await ownedSet(id, user.id, user.role === 'ADMIN');
   if (!set) return { ok: false, error: 'Set not found.' };
+  if (set.archived) return { ok: false, error: 'Restore the set before editing it.' };
   const title = input.title?.trim();
   if (!title) return { ok: false, error: 'Set title is required.' };
   await prisma.questionSet.update({
@@ -82,6 +83,7 @@ export async function addQuestionsToSet(setId: string, questionIds: string[]): P
   const user = await requireRole('INSTRUCTOR', 'ADMIN');
   const set = await ownedSet(setId, user.id, user.role === 'ADMIN');
   if (!set) return { ok: false, error: 'Set not found.' };
+  if (set.archived) return { ok: false, error: 'Restore the set before editing it.' };
   const maxOrder = set.items.reduce((m, i) => Math.max(m, i.order), -1);
   const questions = await prisma.question.findMany({
     where: {
@@ -109,6 +111,7 @@ export async function removeSetItem(setId: string, questionId: string): Promise<
   const user = await requireRole('INSTRUCTOR', 'ADMIN');
   const set = await ownedSet(setId, user.id, user.role === 'ADMIN');
   if (!set) return { ok: false, error: 'Set not found.' };
+  if (set.archived) return { ok: false, error: 'Restore the set before editing it.' };
   await prisma.questionSetItem.delete({
     where: { setId_questionId: { setId, questionId } },
   });
@@ -121,6 +124,7 @@ export async function moveSetItem(setId: string, questionId: string, dir: -1 | 1
   const user = await requireRole('INSTRUCTOR', 'ADMIN');
   const set = await ownedSet(setId, user.id, user.role === 'ADMIN');
   if (!set) return { ok: false, error: 'Set not found.' };
+  if (set.archived) return { ok: false, error: 'Restore the set before editing it.' };
   const items = [...set.items].sort((a, b) => a.order - b.order);
   const idx = items.findIndex((i) => i.questionId === questionId);
   const swapIdx = idx + dir;

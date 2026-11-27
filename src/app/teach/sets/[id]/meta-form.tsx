@@ -6,7 +6,7 @@ import { updateSet } from '@/lib/actions/sets';
 import { Button, Field } from '@/components/ui';
 import { useToast } from '@/components/toast';
 
-export function SetMetaForm({ setId, title, description }: { setId: string; title: string; description: string }) {
+export function SetMetaForm({ setId, title, description, disabled = false }: { setId: string; title: string; description: string; disabled?: boolean }) {
   const router = useRouter();
   const toast = useToast();
   const [t, setT] = useState(title);
@@ -31,13 +31,13 @@ export function SetMetaForm({ setId, title, description }: { setId: string; titl
       }}
     >
       <Field label="Title" htmlFor="set-title">
-        <input id="set-title" value={t} onChange={(e) => setT(e.target.value)} required />
+        <input id="set-title" value={t} onChange={(e) => setT(e.target.value)} required disabled={disabled} />
       </Field>
       <Field label="Description" htmlFor="set-desc">
-        <input id="set-desc" value={d} onChange={(e) => setD(e.target.value)} />
+        <input id="set-desc" value={d} onChange={(e) => setD(e.target.value)} disabled={disabled} />
       </Field>
       {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
-      <Button type="submit" variant="secondary" disabled={busy}>{busy ? 'Saving…' : 'Save'}</Button>
+      {!disabled && <Button type="submit" variant="secondary" disabled={busy}>{busy ? 'Saving…' : 'Save'}</Button>}
     </form>
   );
 }
