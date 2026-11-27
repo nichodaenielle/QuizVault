@@ -2,8 +2,19 @@ import { requireRole } from '@/lib/auth';
 import { AppShell } from '@/components/shell';
 import { PageHeader } from '@/components/ui';
 import { Flow, ManualSection, Shot, Tip, manualNav } from '@/components/manual';
+import { ManualToc } from '@/components/manual-toc';
 
 export const dynamic = 'force-dynamic';
+
+const SECTIONS = [
+  { id: 'dashboard', title: '1. Dashboard' },
+  { id: 'questions', title: '2. Question bank' },
+  { id: 'sets', title: '3. Question sets' },
+  { id: 'assessments', title: '4. Assessments' },
+  { id: 'sections', title: '5. Sections & codes' },
+  { id: 'grading', title: '6. Grading essays' },
+  { id: 'invites', title: '7. Invites' },
+];
 
 export default async function InstructorManual() {
   const user = await requireRole('INSTRUCTOR', 'ADMIN');
@@ -11,6 +22,9 @@ export default async function InstructorManual() {
     <AppShell user={user} nav={manualNav(user.role)}>
       <PageHeader title="Instructor guide" subtitle="Build assessments, run sections, and grade essays." />
 
+      <div className="lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-10">
+      <ManualToc items={SECTIONS} />
+      <div className="min-w-0">
       <ManualSection id="dashboard" title="1. Teaching dashboard">
         <p>
           Stats show your sections, enrolled learners, assessments, and pending grades. The{' '}
@@ -139,6 +153,8 @@ export default async function InstructorManual() {
         </p>
         <Shot src="instructor-invites" alt="Invites page" caption="Create an invite, copy the link, and track who has accepted. Admins additionally see an Admin role option if their email is on the admin-invite allowlist." />
       </ManualSection>
+      </div>
+      </div>
     </AppShell>
   );
 }

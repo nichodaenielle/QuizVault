@@ -2,8 +2,18 @@ import { requireRole } from '@/lib/auth';
 import { AppShell } from '@/components/shell';
 import { PageHeader } from '@/components/ui';
 import { Flow, ManualSection, Shot, Tip, manualNav } from '@/components/manual';
+import { ManualToc } from '@/components/manual-toc';
 
 export const dynamic = 'force-dynamic';
+
+const SECTIONS = [
+  { id: 'sign-in', title: '1. Signing in' },
+  { id: 'join', title: '2. Joining a section' },
+  { id: 'dashboard', title: '3. Your dashboard' },
+  { id: 'section', title: '4. Section page' },
+  { id: 'runner', title: '5. Taking an assessment' },
+  { id: 'results', title: '6. Results & review' },
+];
 
 export default async function LearnerManual() {
   const user = await requireRole('LEARNER', 'INSTRUCTOR', 'ADMIN');
@@ -11,6 +21,9 @@ export default async function LearnerManual() {
     <AppShell user={user} nav={manualNav(user.role)}>
       <PageHeader title="Learner guide" subtitle="Everything you need to join sections and complete assessments." />
 
+      <div className="lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-10">
+      <ManualToc items={SECTIONS} />
+      <div className="min-w-0">
       <ManualSection id="sign-in" title="1. Signing in">
         <p>
           Open QuizVault and choose <strong>Continue with Google</strong>. There is no password — your Google
@@ -110,6 +123,8 @@ export default async function LearnerManual() {
           ]}
         />
       </ManualSection>
+      </div>
+      </div>
     </AppShell>
   );
 }

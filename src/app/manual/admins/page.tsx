@@ -2,8 +2,18 @@ import { requireRole } from '@/lib/auth';
 import { AppShell } from '@/components/shell';
 import { PageHeader } from '@/components/ui';
 import { Flow, ManualSection, Shot, Tip, manualNav } from '@/components/manual';
+import { ManualToc } from '@/components/manual-toc';
 
 export const dynamic = 'force-dynamic';
+
+const SECTIONS = [
+  { id: 'roles', title: '1. Roles & permissions' },
+  { id: 'dashboard', title: '2. Dashboard' },
+  { id: 'users', title: '3. Users & roles' },
+  { id: 'sections-admin', title: '4. Sections' },
+  { id: 'invites-admin', title: '5. Invites' },
+  { id: 'activity', title: '6. Activity log' },
+];
 
 export default async function AdminManual() {
   const user = await requireRole('ADMIN');
@@ -14,6 +24,9 @@ export default async function AdminManual() {
         subtitle="Admins are also instructors — everything in the instructor guide applies. This page covers the admin-only tools."
       />
 
+      <div className="lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-10">
+      <ManualToc items={SECTIONS} />
+      <div className="min-w-0">
       <ManualSection id="roles" title="1. Roles & permissions">
         <p>
           QuizVault has three roles. <strong>Learners</strong> join sections and take assessments.{' '}
@@ -96,6 +109,8 @@ export default async function AdminManual() {
           ]}
         />
       </ManualSection>
+      </div>
+      </div>
     </AppShell>
   );
 }
