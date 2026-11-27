@@ -19,7 +19,7 @@ export function AppShell({
 }) {
   return (
     <div className="min-h-screen bg-ivory-50">
-      <header className="sticky top-0 z-40 bg-pine-900 text-ivory-50 shadow-md">
+      <header className="sticky top-0 z-40 bg-pine-900 bg-[url('/bg/quizvault-navbar-background.svg')] bg-cover bg-center bg-no-repeat text-ivory-50 shadow-md">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5">
           <Link href="/dashboard" className="flex items-center gap-2 font-semibold tracking-tight">
             {/* eslint-disable-next-line @next/next/no-img-element */}
